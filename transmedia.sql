@@ -12,3 +12,7 @@ CREATE TABLE user (
     createDate DATETIME NOT NULL DEFAULT current_timestamp(),
     updateDate DATETIME NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+INSERT INTO user (id, name, email, username, password, verified, verificationKey) VALUES
+(1, 'Joana Silva', 'joana.silva.test@gmail.com', 'joana', '$2y$10$zGvJIpISpzBZgJnF.EUifOTprkIAGdRga9wdVB1JFzf8/hvTJEguO', 1,''),
+(2, 'Tiago Santos', 'tiago.santos.test@gmail.com', 'tiago', '$2y$10$WL7GMQSURQJh/gzfY.Aq7uiQCFcGJPv0bCn7pY15BrEK1G8SdsONC', 1,'');
