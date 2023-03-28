@@ -10,4 +10,5 @@ $stories = $stmt->fetchAll(PDO::FETCH_ASSOC);*/
 echo '<p>Joana = '.password_hash("joana123", PASSWORD_DEFAULT).'</p>'; 
 echo '<p>Tiago = '.password_hash("tiago123", PASSWORD_DEFAULT).'</p>';*/
 
+
 ?>
