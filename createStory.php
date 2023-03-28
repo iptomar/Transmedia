@@ -6,6 +6,10 @@ if (isset($_POST['submitButton'])) {
     $name = $_POST['name'];
     $description = $_POST['description'];
     $author = $_POST['author'];
+
+    // sql query para inserir dados na base de dados
+    $sql = "INSERT INTO Story (name, description, author) VALUES (?, ?, ?)";
+    $pdo->prepare($sql)->execute([$name, $description, $author]);
   
   }
 
@@ -24,7 +28,7 @@ if (isset($_POST['submitButton'])) {
     $currPage = 'createStory';
     $createStory = 'createStory';
     ?>
-<form>
+<form  method="POST">
     <!-- Tell the user to insert the Name !-->
     <div class="form-group">
         <label for="name">Name</label>
