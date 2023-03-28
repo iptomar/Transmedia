@@ -27,11 +27,11 @@ CREATE TABLE video (
     publicationDate DATE NOT NULL,
     updateDate DATE,
     videoCode VARCHAR(11) NOT NULL,
-    FOREIGN KEY (storyId) REFERENCES story(Id)
+    FOREIGN KEY (storyId) REFERENCES story(id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
-INSERT INTO video(id, videoTitle, description, duration, publisher, publicationDate, updateDate, videoCode) VALUES
-(1,
+INSERT INTO video(id, storyId, videoTitle, description, duration, publisher, publicationDate, updateDate, videoCode) VALUES
+(1, 84,
 'Lisp in 100 Seconds', 
 'Lisp is world’s second high-level programming language and is still used to build software today. 
 It was the first to implement many popular programming techniques like higher-order functions, 
