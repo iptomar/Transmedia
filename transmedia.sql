@@ -49,9 +49,9 @@ VALUES
 --
 CREATE TABLE `Story` (
     `id` int(11) NOT NULL,
-    `nome` varchar(255) NOT NULL,
-    `descricao` varchar(255) NOT NULL,
-    `autor` varchar(255) NOT NULL
+    `name` varchar(255) NOT NULL,
+    `description` varchar(255) NOT NULL,
+    `author` varchar(255) NOT NULL
 ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4;
 
 --
@@ -75,7 +75,7 @@ MODIFY
 -- Inserting default data to the Story table
 --
 INSERT INTO
-    `Story` (`id`, `nome`, `descricao`, `autor`)
+    `Story` (`id`, `name`, `description`, `author`)
 VALUES
     (1, 'lol', 'jogar lol', 'filipeguia'),
     (4, 'Saude', 'Levar vacina', ''),
