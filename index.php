@@ -23,5 +23,7 @@ echo '<p>Tiago = '.password_hash("tiago123", PASSWORD_DEFAULT).'</p>';*/
 </head>
 <body>
     <a href= "createStory.php">Create Story</a>
+
+    <a href= "register.php">Register</a>
 </body>
 </html>
