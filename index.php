@@ -1,6 +1,5 @@
 <?php
 require "config/connectdb.php";
-echo "Transmedia";
 
 /*Example of how to execute a SELECT with PDO
 $stmt = $pdo->query('SELECT id, title FROM story');
@@ -22,8 +21,10 @@ echo '<p>Tiago = '.password_hash("tiago123", PASSWORD_DEFAULT).'</p>';*/
     <title>Transmedia</title>
 </head>
 <body>
-    <a href= "createStory.php">Create Story</a>
-
-    <a href= "register.php">Register</a>
+    <?php
+        $currPage = 'index';
+        include "NavBar.php";
+        $index = 'index';
+    ?>
 </body>
 </html>
