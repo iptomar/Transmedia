@@ -1,0 +1,19 @@
+.register{
+    background-color: #219CE1;
+    border-radius: 10px;
+    color: #fff;
+    width: 100px;
+    text-align: center;
+    padding: 5px;
+    text-indent: 0%;
+}
+
+.register:hover{
+    background-color: #2c8dc5;
+    color: #fff;
+    transition: 0.5s;
+}
+
+.signin{
+    color: #111;
+}
