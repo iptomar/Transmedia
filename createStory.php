@@ -1,6 +1,5 @@
 <?php
 require "config/connectdb.php";
-echo "Transmedia";
 
 if (isset($_POST['submitButton'])) {
     $name = $_POST['name'];
@@ -26,6 +25,7 @@ if (isset($_POST['submitButton'])) {
 <body>
 <?php
     $currPage = 'createStory';
+    include "NavBar.php";
     $createStory = 'createStory';
     ?>
 <form  method="POST">
