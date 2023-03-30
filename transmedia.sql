@@ -54,13 +54,35 @@ CREATE TABLE `Story` (
     `author` varchar(255) NOT NULL
 ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4;
 
---
--- Degining the Primary key for the Story Table
---
-ALTER TABLE
-    `Story`
-ADD
-    PRIMARY KEY (`id`);
+INSERT INTO
+    user (
+        id,
+        name,
+        email,
+        username,
+        password,
+        verified,
+        verificationKey
+    )
+VALUES
+    (
+        1,
+        'Joana Silva',
+        'joana.silva.test@gmail.com',
+        'joana',
+        '$2y$10$zGvJIpISpzBZgJnF.EUifOTprkIAGdRga9wdVB1JFzf8/hvTJEguO',
+        1,
+        ''
+    ),
+    (
+        2,
+        'Tiago Santos',
+        'tiago.santos.test@gmail.com',
+        'tiago',
+        '$2y$10$WL7GMQSURQJh/gzfY.Aq7uiQCFcGJPv0bCn7pY15BrEK1G8SdsONC',
+        1,
+        ''
+    );
 
 --
 -- AUTO_INCREMENT of the table Story
