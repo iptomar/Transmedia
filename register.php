@@ -21,13 +21,18 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['submit'])) {
         echo '<script>alert("Something went wrong, please try again")</script>';
     } else {
         if ($repeat_pass == $password) {
-            //Generate the password hash along with the salt
-            $password = password_hash($password, PASSWORD_DEFAULT);
-            //Insert new user into the user table in the database
-            $sql = "INSERT INTO user (name, email, username, password ) VALUES (?,?,?,?)";
-            $stmt = $pdo->prepare($sql);
-            $stmt->execute([$name, $email, $username, $password]);
-            header('Location: index.php');
+            if (!empty($name) && !empty($email) && !empty($username) && !empty($password) && strlen($password) >= 6) {
+                //Generate the password hash along with the salt
+                $password = password_hash($password, PASSWORD_DEFAULT);
+                //Insert new user into the user table in the database
+                $sql = "INSERT INTO user (name, email, username, password ) VALUES (?,?,?,?)";
+                $stmt = $pdo->prepare($sql);
+                $stmt->execute([$name, $email, $username, $password]);
+                header('Location: index.php');
+            } else {
+                //If the input verification on the server side failed show error message
+                echo '<script>alert("Something is wrong with the data, please try again")</script>';
+            }
         } else {
             //If the input verification on the client side failed and the passwords don't match, show error message
             echo '<script>alert("Passwords don\'t match, please try again")</script>';
