@@ -86,14 +86,14 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['submit'])) {
                     <!-- Input for the user to insert the password !-->
                     <div class="form-group">
                         <label for="password" class="form-label">Password</label>
-                        <input type="password" class="form-control" id="password" required name="password">
-                        <div class="invalid-feedback">Please fill out this field</div>
+                        <input type="password" minlength="6" class="form-control" id="password" required name="password">
+                        <div class="invalid-feedback">Please choose a password with a minimum of 6 characters</div>
                     </div>
 
                     <!-- Input for the user to repeat the password !-->
                     <div class="form-group">
                         <label for="repeat-password">Repeat Password</label>
-                        <input type="password" class="form-control" id="repeat-password" required name="repeat-password">
+                        <input type="password" minlength="6" class="form-control" id="repeat-password" required name="repeat-password">
                         <div class="invalid-feedback">The Passwords don't match</div>
                     </div>
 
