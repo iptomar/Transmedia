@@ -1,5 +1,6 @@
 <?php
 require "config/connectdb.php";
+require "functions/email.php";
 $name = '';
 $email = '';
 $username = '';
@@ -28,7 +29,17 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['submit'])) {
                 $sql = "INSERT INTO user (name, email, username, password ) VALUES (?,?,?,?)";
                 $stmt = $pdo->prepare($sql);
                 $stmt->execute([$name, $email, $username, $password]);
-                header('Location: index.php');
+                //Call function which will generate the verification key and send the email
+                $ver_key = generate_email_verification($pdo, $email);
+                //If the verification key is null is because something went wrong
+                if ($ver_key != null) {
+                    echo "<script>alert('An email was sent to $email. Please click the link in it to verify your account');
+                    window.location.replace('index.php');
+                    </script>";
+                } else {
+                    //If the email is not sent an error will appear
+                    echo '<script>alert("An error occured while sending the verification email, please try again");</script>';
+                }
             } else {
                 //If the input verification on the server side failed show error message
                 echo '<script>alert("Something is wrong with the data, please try again")</script>';
