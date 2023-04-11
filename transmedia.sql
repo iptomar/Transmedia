@@ -14,6 +14,14 @@ CREATE TABLE user (
     updateDate DATETIME NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
 ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4;
 
+ALTER TABLE `user`
+MODIFY `id` INT(11) AUTO_INCREMENT;
+
+INSERT INTO `user` (name, email, username, password, verified, verificationKey, createDate, updateDate)
+VALUES
+('Felix', 'felix@felix.felix', 'FeLiX2_3', 'qwerty', 1, 'rerere', '00/00/00', '00/00/00'),
+('Felix', 'felix2@felix.felix', 'FeLiX2_2', 'qwerty', 0, 'rerero', '00/00/01', '10/00/00');
+
 INSERT INTO
     user (
         id,
