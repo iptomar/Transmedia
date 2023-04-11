@@ -14,6 +14,14 @@ CREATE TABLE user (
     updateDate DATETIME NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
 ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4;
 
+ALTER TABLE `user`
+MODIFY `id` INT(11) AUTO_INCREMENT;
+
+INSERT INTO `user` (name, email, username, password, verified, verificationKey, createDate, updateDate)
+VALUES
+('Felix', 'felix@felix.felix', 'FeLiX2_3', 'qwerty', 1, 'rerere', '00/00/00', '00/00/00'),
+('Felix', 'felix2@felix.felix', 'FeLiX2_2', 'qwerty', 0, 'rerero', '00/00/01', '10/00/00');
+
 INSERT INTO
     user (
         id,
@@ -106,3 +114,32 @@ VALUES
     (228, 'Benfica', '', 'filipeguia'),
     (229, 'Porto', '', 'filipeguia'),
     (230, 'Desporto', '', 'filipeguia');
+
+INSERT INTO
+    `Story` (`name`, `description`, `author`)
+VALUES
+    ('teste', 'lorem ipsum', 'maecenas');
+
+CREATE TABLE video (
+    id INT(11) PRIMARY KEY NOT NULL,
+    storyId INT(11) NOT NULL,
+    videoTitle VARCHAR(128) NOT NULL,
+    description LONGTEXT NOT NULL,
+    duration INT(11) NOT NULL, -- duration in seconds
+    publisher VARCHAR(128) NOT NULL,
+    publicationDate DATE NOT NULL,
+    videoCode VARCHAR(11) NOT NULL,
+    FOREIGN KEY (storyId) REFERENCES story(id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+ALTER TABLE
+    `video`
+MODIFY
+    `id` int(11) NOT NULL AUTO_INCREMENT;
+
+INSERT INTO video(storyId, videoTitle, description, duration, publisher, publicationDate, videoCode) VALUES
+(84,
+'Lisp in 100 Seconds', 
+'Lisp is world’s second high-level programming language and is still used to build software today. 
+It was the first to implement many popular programming techniques like higher-order functions, 
+recursion, REPL, garbage collection, and more.', 158, 'Fireship', '2022-10-14', 'INUHCQST7CU')
