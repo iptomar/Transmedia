@@ -17,11 +17,18 @@ function generate_email_verification(PDO $pdo, $email)
     $subject = "Transmedia Email Verification";
     $message = "Please click the following link to confirm your email:\n $link_verify";
     $headers = "From: transmedia.gp@gmail.com";
-    $result = mail($to, $subject, $message, $headers);
 
-    //If the email is successfully sent return the verification key else return null 
-    if ($result) {
-        return $ver_key;
+    //If the email is not successfully sent show an alert with an error message
+    if (!@mail($to, $subject, $message, $headers)) {
+        echo "<script>alert('An error occured while sending the verification email, please try to login and request a new verification email');
+            window.location.replace('index.php');        
+        </script>";
+    } else {
+        //If the verification key was sent show an alert warning the user
+        echo "<script>
+                alert('An email was sent to $email. Please click the link in it to verify your account');             
+                window.location.replace('index.php');
+            </script>";
     }
-    return null;
+    return $ver_key;
 }
