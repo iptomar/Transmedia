@@ -85,6 +85,11 @@ VALUES
     (229, 'Porto', '', 'filipeguia'),
     (230, 'Desporto', '', 'filipeguia');
 
+INSERT INTO
+    `Story` (`name`, `description`, `author`)
+VALUES
+    ('teste', 'lorem ipsum', 'maecenas');
+
 CREATE TABLE video (
     id INT(11) PRIMARY KEY NOT NULL,
     storyId INT(11) NOT NULL,
@@ -97,8 +102,13 @@ CREATE TABLE video (
     FOREIGN KEY (storyId) REFERENCES story(id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
-INSERT INTO video(id, storyId, videoTitle, description, duration, publisher, publicationDate, videoCode) VALUES
-(1, 84,
+ALTER TABLE
+    `video`
+MODIFY
+    `id` int(11) NOT NULL AUTO_INCREMENT;
+
+INSERT INTO video(storyId, videoTitle, description, duration, publisher, publicationDate, videoCode) VALUES
+(84,
 'Lisp in 100 Seconds', 
 'Lisp is world’s second high-level programming language and is still used to build software today. 
 It was the first to implement many popular programming techniques like higher-order functions, 
