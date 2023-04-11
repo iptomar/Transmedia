@@ -40,8 +40,9 @@ echo '<p>Tiago = '.password_hash("tiago123", PASSWORD_DEFAULT).'</p>';*/
         </div>
 
         <div class="availablestories">
-            <a href="#">Available Stories</a>
+            <a href="storiesCatalogue.php">Available Stories</a>
         </div>
     <div>
+        
 </body>
 </html>

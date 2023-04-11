@@ -9,7 +9,7 @@
 
 .text{
     font-family: 'Roboto', sans-serif;
-    font-size: 7em;
+    font-size: 8vw;
 }
 
 .logo{
@@ -39,4 +39,20 @@ a {
 }
 strong{
     color: #219CE1;
+}
+
+img{
+    width: 100%;
+    height: auto;
+}
+
+@media screen and (max-width: 836px) {
+    .logo{
+        display: none;
+    }
+
+    .text{
+        font-family: 'Roboto', sans-serif;
+        font-size: 40px;
+    }
 }
