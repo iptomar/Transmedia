@@ -7,7 +7,7 @@ $username = '';
 $password =  '';
 $repeat_pass =  '';
 
-if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['submit'])) {
+if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $name = $_POST["name"];
     $email = $_POST["email"];
     $username = $_POST["username"];
@@ -31,7 +31,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['submit'])) {
                 $stmt->execute([$name, $email, $username, $password]);
                 //Call function which will generate the verification key and send the email
                 $ver_key = generate_email_verification($pdo, $email);
-
             } else {
                 //If the input verification on the server side failed show error message
                 echo '<script>alert("Something is wrong with the data, please try again")</script>';
@@ -105,27 +104,28 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['submit'])) {
                         <div class="invalid-feedback">The Passwords don't match</div>
                     </div>
 
-                    <button type="submit" name="submit" class="btn btn-primary">Submit</button>
+                    <button type="submit" name="submit_register" class="btn btn-primary">Submit</button>
                 </form>
             </div>
         </div>
     </div>
     <script>
-        //On focus out of the repeat password input verify if the input matches the password input
-        $("#repeat-password").focusout(function() {
-            var input = document.getElementById('repeat-password');
-            if (input.value != document.getElementById('password').value) {
-                input.setCustomValidity("The Passwords don't match");
-            } else {
-                // input is valid -- reset the error message
-                input.setCustomValidity('');
+        // Disable form submissions if there are invalid fields
+        (function() {
+            'use strict'
+            var form = document.getElementById('form-register');
+            form.addEventListener('submit', function(event) {
+                if (!form.checkValidity()) {
+                    event.preventDefault()
+                    event.stopPropagation()
+                }
+                form.classList.add('was-validated')
+            }, false)
+        })()
 
-            }
-        });
-
-        //On focus out of the email input use a ajax to the file ajax.php call to verify if email is already in use
-        $("#email").focusout(function() {
-            $.ajax({
+        //AJAX used to calls the function verify_email_exists in the file functios/ajax.php
+        function emailVerify() {
+            return $.ajax({
                 type: "POST",
                 url: "functions/ajax.php",
                 data: {
@@ -143,12 +143,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['submit'])) {
                     }
                 }
             });
+        }
 
-        });
-
-        //On focus out of the username input use a ajax call to verify if username is already in use
-        $("#username").focusout(function() {
-            $.ajax({
+        //AJAX used to calls the function verify_username_exists in the file functios/ajax.php
+        function usernameVerify() {
+            return $.ajax({
                 type: "POST",
                 url: "functions/ajax.php",
                 data: {
@@ -166,22 +165,48 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['submit'])) {
                     }
                 }
             });
+        }
+
+
+        //Stop form submission until the AJAX that verifies if the email and username are valid finishes
+        $('#form-register').submit(function(event, options) {
+            //Stop submit before running the AJAX
+            event.preventDefault();
+            event.stopPropagation();
+            //Call the functions that use AJAX to verify if the email and username are unique
+            var emailAjax = emailVerify();
+            var userAjax = usernameVerify();
+            //When both ajax functions end try submitting the form
+            $.when(emailAjax, userAjax).done(function(emailResult, userResult) {
+                var form = document.getElementById('form-register');
+                //if the form is valid submit
+                if (form.checkValidity()) {
+                    $('form').unbind('submit').submit();
+                }
+            });
+        })
+
+
+        //On focus out of the repeat password input verify if the input matches the password input
+        $("#repeat-password").focusout(function() {
+            var input = document.getElementById('repeat-password');
+            if (input.value != document.getElementById('password').value) {
+                input.setCustomValidity("The Passwords don't match");
+            } else {
+                // input is valid -- reset the error message
+                input.setCustomValidity('');
+            }
         });
 
+        //On focus out of the email input call the function email_verify that uses AJAX 
+        $("#email").focusout(function() {
+            emailVerify();
+        });
 
-        // Disable form submissions if there are invalid fields
-        (function() {
-            'use strict'
-            var form = document.getElementById('form-register');
-            form.addEventListener('submit', function(event) {
-                if (!form.checkValidity()) {
-                    event.preventDefault()
-                    event.stopPropagation()
-                }
-                form.classList.add('was-validated')
-            }, false)
-
-        })()
+        //On focus out of the username input call the function email_verify that uses AJAX 
+        $("#username").focusout(function() {
+            usernameVerify()
+        });
     </script>
 </body>
 
