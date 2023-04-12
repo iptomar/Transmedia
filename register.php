@@ -1,12 +1,11 @@
 <?php
 require "config/connectdb.php";
-require "functions/email.php";
+require "functions/validate.php";
 $name = '';
 $email = '';
 $username = '';
 $password =  '';
 $repeat_pass =  '';
-
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $name = $_POST["name"];
     $email = $_POST["email"];
@@ -21,23 +20,19 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         //If username or email is not unique give a error
         echo '<script>alert("Something went wrong, please try again")</script>';
     } else {
-        if ($repeat_pass == $password) {
-            if (!empty($name) && !empty($email) && !empty($username) && !empty($password) && strlen($password) >= 6) {
-                //Generate the password hash along with the salt
-                $password = password_hash($password, PASSWORD_DEFAULT);
-                //Insert new user into the user table in the database
-                $sql = "INSERT INTO user (name, email, username, password ) VALUES (?,?,?,?)";
-                $stmt = $pdo->prepare($sql);
-                $stmt->execute([$name, $email, $username, $password]);
-                //Call function which will generate the verification key and send the email
-                $ver_key = generate_email_verification($pdo, $email);
-            } else {
-                //If the input verification on the server side failed show error message
-                echo '<script>alert("Something is wrong with the data, please try again")</script>';
-            }
+        $error = verify_register_input($name, $username, $email, $password, $repeat_pass);
+        if ($error == null) {
+            //Generate the password hash along with the salt
+            $password = password_hash($password, PASSWORD_DEFAULT);
+            //Insert new user into the user table in the database
+            $sql = "INSERT INTO user (name, email, username, password ) VALUES (?,?,?,?)";
+            $stmt = $pdo->prepare($sql);
+            $stmt->execute([$name, $email, $username, $password]);
+            //Call function which will generate the verification key and send the email
+            $ver_key = generate_email_verification($pdo, $email);
         } else {
             //If the input verification on the client side failed and the passwords don't match, show error message
-            echo '<script>alert("Passwords don\'t match, please try again")</script>';
+            echo "<script>alert('$error, please input a valid value and try again')</script>";
         }
     }
 }
@@ -72,15 +67,15 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                     <!-- Input for the user to insert the name !-->
                     <div class="form-group">
                         <label for="name" class="form-label">Name</label>
-                        <input type="text" maxlength="128" class="form-control" id="name" required name="name" value="<?= $name ?>">
-                        <div class="invalid-feedback">Please fill out this field</div>
+                        <input type="text" maxlength="128" class="form-control" id="name" required pattern="[a-zA-ZÀ-ÖØ-öø-ÿ. -]+" name="name" value="<?= $name ?>">
+                        <div class="invalid-feedback">Please input a valid name</div>
                     </div>
 
                     <!-- Input for the user to insert the username !-->
                     <div class="form-group">
                         <label for="username" class="form-label">Username</label>
-                        <input type="text" maxlength="128" class="form-control" id="username" required name="username" value="<?= $username ?>">
-                        <div id="username-error" class="invalid-feedback">Please input a valid username</div>
+                        <input type="text" maxlength="128" class="form-control" id="username" required name="username" pattern="[A-Za-z0-9_]{4,20}" value="<?= $username ?>">
+                        <div id="username-error" class="invalid-feedback">Please input a valid username: 4-20 characters and can contain letters, numbers and underscores</div>
                     </div>
 
                     <!-- Input for the user to insert the email !-->
@@ -160,7 +155,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                         error.innerHTML = "Username is already in use. Please try another";
                         input.setCustomValidity("Username is already in use");
                     } else {
-                        error.innerHTML = "Please input a valid username";
+                        error.innerHTML = "Please input a valid username: 4-20 characters and can contain letters, numbers and underscores";
                         input.setCustomValidity('');
                     }
                 }
