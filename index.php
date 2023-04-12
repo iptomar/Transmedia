@@ -25,6 +25,7 @@ echo '<p>Tiago = '.password_hash("tiago123", PASSWORD_DEFAULT).'</p>';*/
     <?php
         $currPage = 'index';
         include "NavBar.php";
+        include "footer.php";
         $index = 'index';
     ?>
     
