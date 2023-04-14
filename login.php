@@ -1,6 +1,36 @@
 <?php
 require "config/connectdb.php";
+//Start new or resume existing session
+session_start();
 
+$login_method = '';
+$error = '';
+if ($_SERVER["REQUEST_METHOD"] == "POST") {
+    $login_method = $_POST["login_method"];
+    $password = $_POST["password"];
+    
+    //Select user with the username or email
+    $sql = 'SELECT username,email,password,verified from user WHERE username = ? OR email=? LIMIT 1';
+    $stmt = $pdo->prepare($sql);
+    $stmt->execute([$login_method, $login_method]);
+    $user = $stmt->fetch(PDO::FETCH_ASSOC);
+
+    //Verify if there is a user and in case there is verify if the password it's correct
+    if (!empty($user) && password_verify($password, $user['password']) == 1) {
+        //If user is not verified, don't allow login
+        if (!$user['verified']) {
+            $error = "Account is not verified. Please look for the verification email in your inbox";
+        } else {
+            //Set the username as a session variable
+            $_SESSION["user"] = $user['username'];
+            //Redirect to the index page, in the future it should be changed to the "My Stories" page
+            header("location: index.php");
+        }
+    } else {
+        //If the user is not found or the password is wrong, define the error to show in the div
+        $error = "Something went wrong, please try again";
+    }
+}
 ?>
 
 
@@ -39,7 +69,7 @@ require "config/connectdb.php";
                         <label for="password" class="form-label">Password</label>
                         <input type="password" class="form-control" id="password" required name="password">
                     </div>
-                    <div class="error"><?= $error?></div>
+                    <div class="error mb-2"><?= $error ?></div>
                     <button type="submit" name="submit" class="btn btn-primary">Login</button>
                 </form>
             </div>
