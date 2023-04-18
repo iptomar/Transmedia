@@ -1,9 +1,9 @@
 <?php
 require "config/connectdb.php";
 
-$storyName = $pdo->prepare('SELECT `name` FROM story WHERE `name`= ?')
-$storyDescription = $pdo->prepare('SELECT `description` FROM story WHERE `description` = ?')
-$storyAuthor = $pdo->prepare('SELECT `author` FROM story WHERE `author` = ?')
+$story = $pdo->prepare('SELECT name,description,author FROM story WHERE id= ?');
+$story->execute([$_GET['id']]);
+$storyFetch = $story->fetch(PDO::FETCH_ASSOC);
 ?>
 
 <!DOCTYPE html>
@@ -16,21 +16,38 @@ $storyAuthor = $pdo->prepare('SELECT `author` FROM story WHERE `author` = ?')
     <title>Story Selected</title>
 </head>
 <body>
-
+    <?php
+    include "NavBar.php";
+    ?>
     <div class="Name">
-        <label for="name">Name</label>
-        <?php print($storyName)?>
+        <label for="name" style="font-size:20px; font-weight: bold;">Name</label>
+        <p>
+        <?php
+            print($storyFetch['name'])
+        ?>
+        </p>
     </div>
 
     <div class="description">
-        <label for="description">Description</label>
-        <?php print($storyDescription)?>
+        <label for="description" style="font-size:20px; font-weight: bold;">Description</label>
+        <p>
+        <?php
+            if(print($storyFetch['description'] = null)){
+                print("no description");
+            }else{
+                print($storyFetch['description']);
+            }
+        ?>
+        </p>
     </div>
 
     <div class="author">
-        <label for="author">Author</label>
-        <?php print($storyAuthor)?>
+        <label for="author" style="font-size:20px; font-weight: bold;">Author</label>
+        <p>
+        <?php
+            print($storyFetch['author'])
+        ?>
+        </p>
     </div>
-
 </body>
 </html>
