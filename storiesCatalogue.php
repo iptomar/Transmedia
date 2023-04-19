@@ -2,7 +2,7 @@
 
 require "config/connectdb.php";
 
-$stmt = $pdo->prepare('SELECT `name` FROM story');
+$stmt = $pdo->prepare('SELECT id,name FROM story');
 $stmt->execute();
 $stories = $stmt->fetchAll(PDO::FETCH_COLUMN);
 
@@ -31,7 +31,7 @@ $stories = $stmt->fetchAll(PDO::FETCH_COLUMN);
 
         ?>
             <div class="d-inline-block text-truncate" style="max-width: 300px; margin: 5px;">
-                <a href="index.php">
+                <a href="selectedStoryPage.php?id=<?=$stories[$i] ?>">
                     <img src="100x100_logo.png" class="img-fluid img-thumbnail" style="max-width: 300px;" />
                 </a>
                 <br>
