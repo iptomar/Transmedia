@@ -25,11 +25,10 @@ echo '<p>Tiago = '.password_hash("tiago123", PASSWORD_DEFAULT).'</p>';*/
     <?php
         $currPage = 'index';
         include "NavBar.php";
-        include "footer.php";
         $index = 'index';
     ?>
     
-    <div>
+    <div class="content">
         <div class = "content_text">
             <div class = "logo">
                 <img src="./assets/landing_logo.svg"></img>
@@ -43,7 +42,10 @@ echo '<p>Tiago = '.password_hash("tiago123", PASSWORD_DEFAULT).'</p>';*/
         <div class="availablestories">
             <a href="storiesCatalogue.php">Available Stories</a>
         </div>
-    <div>
+    </div>
         
+    <?php
+        include "footer.php";
+    ?>
 </body>
 </html>

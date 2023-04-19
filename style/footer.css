@@ -3,8 +3,22 @@ footer{
     justify-content: center;
     align-items: center;
     padding: 10px;
-    position: absolute; 
-    bottom: 0;
     background-color: #219CE1;
     width: 100%;
+}
+
+.links{
+    display: flex;
+    align-items: center;
+    justify-content: space-around;
+}
+
+.links a {
+    color: #fff;
+    text-decoration: underline;
+}
+
+img{
+    width: 100%;
+    height: auto;
 }

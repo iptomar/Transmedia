@@ -21,6 +21,11 @@ $stories = $stmt->fetchAll(PDO::FETCH_COLUMN);
 </head>
 
 <body>
+    <?php
+        $currPage = 'index';
+        include "NavBar.php";
+        $index = 'index';
+    ?>
     <div class="d-inline-block" style="max-width: 940px">
         <?php for ($i = 0; $i < count($stories); $i++) {
 
@@ -41,6 +46,9 @@ $stories = $stmt->fetchAll(PDO::FETCH_COLUMN);
 
         ?>
     </div>
+    <?php
+        include "footer.php";
+    ?>
 </body>
 
 </html>
