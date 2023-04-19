@@ -1,5 +1,6 @@
 <?php
-require "config/connectdb.php";
+//echo $_SESSION["user"];
+require "restriction_story_user.php";
 
 if (isset($_POST['submitButton'])) {
     $name = $_POST['name'];
