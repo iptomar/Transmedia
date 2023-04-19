@@ -24,8 +24,8 @@ require_once "config/connectdb.php";
         <a class="nav-link" href="#">My Stories</a>
       </li>
     </ul>
-    <a class="nav-link signin" href="#">SignIN</a>
-    <a class="nav-link register" href="#">Register</a>
+    <a class="nav-link signin" href="login.php">Login</a>
+    <a class="nav-link register" href="register.php">Register</a>
   </div>
 </nav>
 
