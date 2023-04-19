@@ -4,13 +4,12 @@ session_start();
 
 require "config/connectdb.php";
 
-if(isset($_SESSION["user"])){
+if(!isset($_SESSION["user"])){
     echo "<script>
     alert('You need to login to create a story');
-    window.location.href=’createStory.php’
+    window.location.replace('index.php');        
     </script>";
-}else {
-    header("location: createStory.php");
+
 }
 
 ?>

@@ -18,7 +18,7 @@ require_once "config/connectdb.php";
   <div class="collapse navbar-collapse" id="navbarTogglerDemo02">
     <ul class="navbar-nav mx-auto mt-2 mt-lg-0">
       <li class="nav-item">
-        <a class="nav-link" href="restriction_story_user.php">Create Story</a>
+        <a class="nav-link" href="createStory.php">Create Story</a>
       </li>
       <li class="nav-item">
         <a class="nav-link" href="#">My Stories</a>
