@@ -68,23 +68,23 @@ INSERT INTO `story` (`id`, `name`, `description`, `author`) VALUES
 CREATE TABLE `video` (
   `id` int(11) NOT NULL,
   `storyId` int(11) NOT NULL,
-  `videoTitle` varchar(128) NOT NULL,
-  `description` longtext NOT NULL,
+  `storyOrder` int(11) NOT NULL,
+  `link` varchar(128) NOT NULL,
   `duration` int(11) NOT NULL,
-  `publisher` varchar(128) NOT NULL,
-  `publicationDate` date NOT NULL,
-  `videoCode` varchar(11) NOT NULL
+  `videoType` varchar(128) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 ALTER TABLE `video`
   ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `storyOrder` (`storyId`,`storyOrder`),
   ADD KEY `storyId` (`storyId`),
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT,
   ADD CONSTRAINT `video_ibfk_1` FOREIGN KEY (`storyId`) REFERENCES `story` (`id`);
 
---
--- Data of table `video`
---
 
-INSERT INTO `video` (`id`, `storyId`, `videoTitle`, `description`, `duration`, `publisher`, `publicationDate`, `videoCode`) VALUES
-(1, 84, 'Lisp in 100 Seconds', 'Lisp is world’s second high-level programming language and is still used to build software today. \r\nIt was the first to implement many popular programming techniques like higher-order functions, \r\nrecursion, REPL, garbage collection, and more.', 158, 'Fireship', '2022-10-14', 'INUHCQST7CU');  
+INSERT INTO `video` (`id`, `storyId`, `storyOrder`, `link`, `duration`, `videoType`) VALUES
+(1, 228, 1, 'video_1682034312.mp4', 107, 'file'),
+(2, 224, 1, 'CKThDImMq3o', 103, 'text'),
+(3, 228, 2, 'HihzFAZ1XbA', 415, 'text'),
+(4, 1, 1, 'FGlhWPwrkDg', 196, 'text'),
+(5, 1, 2, 'mDYqT0_9VR4', 242, 'text');
