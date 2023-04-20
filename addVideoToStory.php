@@ -1,5 +1,10 @@
 <?php
 include "./NavBar.php";
+
+$stmt = $pdo->prepare('SELECT id,name, author FROM story');
+$stmt->execute();
+$stories = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
 if (!isset($_GET["videotype"])) {
     $_GET["videotype"] = "text";
 }
@@ -7,14 +12,14 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     if ($_GET["videotype"] == "text") {
         $video = $_POST["chooseVideo"];
         $valid = preg_match("/^(?:https?:\/\/)?(?:www\.)?(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|watch\?.+&v=))((\w|-){11})(?:\S+)?$/", $video);
-        if($valid){
-
+        if ($valid) {
+            // echo "Add Youtube to " . $_POST['story'];
         }
     } elseif ($_GET["videotype"] == "file") {
         $mimeType = mime_content_type($_FILES['chooseVideo']['tmp_name']);
         $fileType = explode('/', $mimeType)[0];
-        if($fileType == "video"){
-            echo "videok wdvo";
+        if ($fileType == "video") {
+            // echo "Add Video File to " . $_POST['story'];
         }
     }
 }
@@ -60,8 +65,20 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                     </div>
 
                 </form>
-                <div id="preview"></div>
-                <form method="post" enctype="multipart/form-data"> 
+                <form method="post" enctype="multipart/form-data">
+                    <div class="form-group">
+                        <label for="story" style="float: left">Choose Story:</label>
+                        <select required name="story" class="form-select form-select-lg mb-3 w-100" aria-label=".form-select-lg example">
+                            <option value="">Select the story</option>
+                            <?php
+                            foreach ($stories as $story) :
+                                echo '<option value="' . $story['id'] . '">' . $story['name'] . '</option>';
+                            endforeach;
+                            ?>
+                        </select>
+                    </div>
+                    <div id="preview"></div>
+
                     <div class="form-group">
                         <label for="chooseVideo" style="float: left">Choose Video:</label>
                         <input class="form-control" required name="chooseVideo" type=<?= $_GET["videotype"] ?> <?php echo $_GET["videotype"]  == "file" ?
