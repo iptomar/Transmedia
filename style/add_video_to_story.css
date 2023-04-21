@@ -1,0 +1,16 @@
+.container {
+    max-width: 800px;
+}
+
+.form-group {
+    text-align: start;
+}
+
+.form-check {
+    margin-left: 20px;
+    margin-bottom: 10px;
+}
+
+input[type='radio'] {
+    transform: scale(1.2);
+}
