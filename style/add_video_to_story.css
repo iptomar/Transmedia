@@ -1,7 +1,3 @@
-body {
-    text-align: center;
-}
-
 .container {
     max-width: 800px;
 }
@@ -17,23 +13,4 @@ body {
 
 input[type='radio'] {
     transform: scale(1.2);
-}
-
-#preview {
-    margin-bottom: 20px;
-}
-
-#preview div {
-    position: relative;
-    height: 0;
-    padding-bottom: 56.25%;
-}
-
-#preview iframe,
-#preview video {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
 }
