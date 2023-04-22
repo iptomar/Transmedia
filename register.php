@@ -1,6 +1,11 @@
 <?php
 require "config/connectdb.php";
 require "functions/validate.php";
+session_start();
+//If user is logged in, redirect them to index.php
+if (isset($_SESSION["user"])) {
+    header("location: index.php");
+}
 $name = '';
 $email = '';
 $username = '';

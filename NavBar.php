@@ -1,7 +1,9 @@
 <?php
 require_once "config/connectdb.php";
-
-
+//Start session if it has not yet started
+if (session_status() === PHP_SESSION_NONE) {
+  session_start();
+}
 ?>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
 
@@ -27,8 +29,15 @@ require_once "config/connectdb.php";
         <a class="nav-link" href="addVideoToStory.php">Add Video</a>
       </li>
     </ul>
-    <a class="nav-link signin" href="login.php">Login</a>
-    <a class="nav-link register" href="register.php">Register</a>
+    <?php
+    //Verify if user is logged in, if he is instead of login and register button show logout button
+    if (!isset($_SESSION["user"])) {
+      echo "<a class='nav-link signin' href='login.php'>Login</a>";
+      echo "<a class='nav-link register' href='register.php'>Register</a>";
+    } else {
+      echo "<a class='nav-link logout' href='logout.php'>Logout</a>";
+    }
+    ?>
   </div>
 </nav>
 <script src="https://code.jquery.com/jquery-3.2.1.min.js" integrity="sha384-xBuQ/xzmlsLoJpyjoggmTEz8OWUFM0/RC5BsqQBDX2v5cMvDHcMakNTNrHIW2I5f" crossorigin="anonymous"></script>

@@ -1,11 +1,18 @@
-.register{
-    background-color: #219CE1;
+.register, .logout{
     border-radius: 10px;
-    color: #fff;
+    color: #fff !important;
     width: 100px;
     text-align: center;
     padding: 5px;
     text-indent: 0%;
+}
+
+.register{
+    background-color: #219CE1;
+}
+
+.logout{
+    background-color: #ff0000;
 }
 
 .register:hover{
@@ -14,6 +21,12 @@
     transition: 0.5s;
 }
 
+.logout:hover{
+    background-color: #c01f1f;
+    color: #fff;
+    transition: 0.5s;
+}
+
 .signin{
-    color: #111;
+    color: #111 !important;
 }
