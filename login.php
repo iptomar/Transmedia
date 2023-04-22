@@ -2,7 +2,10 @@
 require "config/connectdb.php";
 //Start new or resume existing session
 session_start();
-
+//If user is logged in, redirect them to index.php
+if (isset($_SESSION["user"])) {
+    header("location: index.php");
+}
 $login_method = '';
 $error = '';
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
