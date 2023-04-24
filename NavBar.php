@@ -23,7 +23,7 @@ if (session_status() === PHP_SESSION_NONE) {
         <a class="nav-link" href="createStory.php">Create Story</a>
       </li>
       <li class="nav-item">
-        <a class="nav-link" href="#">My Stories</a>
+        <a class="nav-link" href="my_stories.php">My Stories</a>
       </li>
       <li class="nav-item">
         <a class="nav-link" href="addVideoToStory.php">Add Video</a>
