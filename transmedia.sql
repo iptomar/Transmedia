@@ -46,19 +46,21 @@ CREATE TABLE `story` (
 
 ALTER TABLE `story`
   ADD PRIMARY KEY (`id`),
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT,
+  ADD FOREIGN KEY (`author`) REFERENCES `user` (`username`);
+
 
 -- Data of table `story`
 
 INSERT INTO `story` (`id`, `name`, `description`, `author`) VALUES
-(1, 'lol', 'jogar lol', 'filipeguia'),
-(4, 'Saude', 'Levar vacina', ''),
-(84, 'Teste2', '', 'filipeguia'),
-(224, 'Sporting', '', 'filipeguia'),
-(228, 'Benfica', '', 'filipeguia'),
-(229, 'Porto', '', 'filipeguia'),
-(230, 'Desporto', '', 'filipeguia'),
-(231, 'teste', 'lorem ipsum', 'maecenas');
+(1, 'lol', 'jogar lol', 'joana'),
+(4, 'Saude', 'Levar vacina', 'tiago'),
+(84, 'Teste2', '', 'tiago'),
+(224, 'Sporting', '', 'joana'),
+(228, 'Benfica', '', 'tiago'),
+(229, 'Porto', '', 'joana'),
+(230, 'Desporto', '', 'tiago'),
+(231, 'teste', 'lorem ipsum', 'joana');
 
 
 -- --------------------------------------------------------

@@ -1,8 +1,10 @@
 <?php
+require "verify_login.php";
 include "./NavBar.php";
 include "./functions/useful.php";
-$stmt = $pdo->prepare('SELECT id,name, author FROM story');
-$stmt->execute();
+
+$stmt = $pdo->prepare('SELECT id,name, author FROM story where author=?');
+$stmt->execute([$_SESSION['user']]);
 $stories = $stmt->fetchAll(PDO::FETCH_ASSOC);
 //Pattern to verify if the text is a youtube video
 $pattern = "/^(?:https?:\/\/)?(?:www\.)?(?:youtu\.be\/|youtube\.com\/(?:embed\/|live\/|shorts\/|v\/|watch\?v=|watch\?.+&v=))((\w|-){11})(?:\S+)?$/";

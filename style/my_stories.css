@@ -1,0 +1,11 @@
+.stories {
+    max-width: 1500px;
+    margin: auto;
+}
+
+.story_container {
+    max-width: 300px;
+    margin: auto;
+    font-weight: bold;
+    font-size: 18px;
+}
