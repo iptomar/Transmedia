@@ -135,3 +135,31 @@ VALUES
   (3, 228, 2, 'HihzFAZ1XbA', 415, 'text'),
   (4, 1, 1, 'FGlhWPwrkDg', 196, 'text'),
   (5, 1, 2, 'mDYqT0_9VR4', 242, 'text');
+
+-- Create Audio Table
+CREATE TABLE `audio` (
+  `id` int(11) NOT NULL,
+  `id_historia` int(11) NOT NULL,
+  `audio` varchar(255) DEFAULT NULL,
+  `autor` varchar(255) DEFAULT NULL
+) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4;
+
+-- Insert data to the table
+INSERT INTO
+  `audio` (`id`, `id_historia`, `audio`, `autor`)
+VALUES
+  (9, 224, 'MeuSportingAudio.mov', 'filipeguia');
+
+-- Add foreign key
+ALTER TABLE
+  `audio`
+ADD
+  CONSTRAINT `audio_ibfk_1` FOREIGN KEY (`id_historia`) REFERENCES `historia` (`id`);
+
+-- Add Primary Key
+ALTER TABLE
+  `audio`
+ADD
+  PRIMARY KEY (`id`),
+ADD
+  KEY `id_historia` (`id_historia`);
