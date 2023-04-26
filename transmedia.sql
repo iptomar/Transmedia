@@ -146,7 +146,7 @@ CREATE TABLE `audio` (
 
 -- Insert data to the table
 INSERT INTO
-  `audio` (`id`, `id_historia`, `audio`, `autor`)
+  `audio` (`id`, `id_story`, `audio`, `autor`)
 VALUES
   (9, 224, 'MeuSportingAudio.mov', 'filipeguia');
 
@@ -154,7 +154,7 @@ VALUES
 ALTER TABLE
   `audio`
 ADD
-  CONSTRAINT `audio_ibfk_1` FOREIGN KEY (`id_historia`) REFERENCES `historia` (`id`);
+  CONSTRAINT `audio_ibfk_1` FOREIGN KEY (`id_story`) REFERENCES `story` (`id`);
 
 -- Add Primary Key
 ALTER TABLE
@@ -162,4 +162,4 @@ ALTER TABLE
 ADD
   PRIMARY KEY (`id`),
 ADD
-  KEY `id_historia` (`id_historia`);
+  KEY `id_story` (`id_story`);
