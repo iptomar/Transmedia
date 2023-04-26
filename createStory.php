@@ -1,10 +1,12 @@
 <?php
-require "config/connectdb.php";
+//echo $_SESSION["user"];
+require "restriction_story_user.php";
 
 if (isset($_POST['submitButton'])) {
     $name = $_POST['name'];
     $description = $_POST['description'];
-    $author = $_POST['author'];
+    //The author is the currently logged in user's username, saved in the session variable 'user'
+    $author = $_SESSION["user"];
 
     // sql query para inserir dados na base de dados
     $sql = "INSERT INTO Story (name, description, author) VALUES (?, ?, ?)";
@@ -40,13 +42,9 @@ if (isset($_POST['submitButton'])) {
         <label for="description">Description</label>
         <input class="form-control" id = "description" required name="description" type="text">
     </div>
-
-    <!-- Tell the user to insert the Author !-->
-    <div class="form-group">
-        <label for="author">Author</label>
-        <input class="form-control" id = "author" required name="author" type="text">
-    </div>
   <button type="submit" name="submitButton" class="btn btn-primary">Submit</button>
 </form>
+
+
 </body>
 </html>
