@@ -8,34 +8,46 @@ $stmt->execute([$_SESSION['user']]);
 $stories = $stmt->fetchAll(PDO::FETCH_ASSOC);
 //Pattern to verify if the text is a youtube video
 $pattern = "/^(?:https?:\/\/)?(?:www\.)?(?:youtu\.be\/|youtube\.com\/(?:embed\/|live\/|shorts\/|v\/|watch\?v=|watch\?.+&v=))((\w|-){11})(?:\S+)?$/";
-if (!isset($_GET["videotype"])) {
+if (!isset($_GET["videotype"]) || $_GET["videotype"] == null) {
     $_GET["videotype"] = "text";
 }
 //Get video type
 $type = $_GET["videotype"];
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
+    //If no story was selected show error message and reload the page
+    if (!isset($_POST['story'])) {
+        message_redirect("ERROR occurred when selecting the story", $redirect);
+        die();
+    }
+    //Get story id
+    $storyId = $_POST['story'];
+
+    //Verify if story belongs to the user
+    $found = in_array($storyId, array_column($stories, 'id'));
+    if (!$found) {
+        message_redirect("ERROR please select a valid story", $redirect);
+        die();
+    }
+
+    //Link to redirect back to page, with options selected, after error occurs
+    $redirect = basename(__FILE__) . "?videotype=$type&story=$storyId";
+
     //Get video duration from hidden input
     if (isset($_POST["duration"]) && $_POST["duration"] > 0) {
         $duration =  $_POST["duration"];
     } else {
         //If the duration is not set show error message
-        message_redirect("ERROR occurred when getting the duration", basename(__FILE__) . "?videotype=$type");
+        message_redirect("ERROR occurred when getting the duration", $redirect);
         die();
     }
-    //If no story was selected show error message and reload the page
-    if (!isset($_POST['story'])) {
-        message_redirect("ERROR occurred when selecting the story", basename(__FILE__) . "?videotype=$type");
-        die();
-    }
-    //Get story id
-    $storyId = $_POST['story'];
+
     //Save the video to a variable, and check the data, according to the video type
     if ($type == "text") {
         $video = $_POST["chooseVideo"];
         $valid = preg_match($pattern, $video,  $matches);
         if (!$valid) {
-            message_redirect("ERROR link is not a youtube video", basename(__FILE__) . "?videotype=$type");
+            message_redirect("ERROR link is not a youtube video", $redirect);
             die();
         } else {
             //Get the youtube video id that is going to be saved in the database
@@ -45,13 +57,13 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $mimeType = mime_content_type($_FILES['chooseVideo']['tmp_name']);
         $fileType = explode('/', $mimeType)[0];
         if (!$fileType == "video") {
-            message_redirect("ERROR file is not a valid video", basename(__FILE__) . "?videotype=$type");
+            message_redirect("ERROR file is not a valid video", $redirect);
             die();
         }
         //Save the video with a new name
         $video = generate_file_name("video_", "chooseVideo");
         if (!save_file("./files/story_$storyId/video/", $video, "chooseVideo")) {
-            message_redirect("ERROR occured while saving file", basename(__FILE__) . "?videotype=$type");
+            message_redirect("ERROR occurred while saving file", $redirect);
             die();
         }
     } else {
@@ -92,7 +104,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         <div class="card">
             <div class="card-header text-center">Add Video to Story</div>
             <div class="card-body">
-                <form method="GET">
+                <form method="GET" id="formGet">
                     <br>
                     <div class="form-group">
                         <label for="option_youtube">
@@ -110,17 +122,22 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                                 File
                             </label>
                         </div>
+                        <input type="hidden" id="storyId" name="story" value="<?= isset($_GET['story']) ?  $_GET['story'] : "" ?>" />
                     </div>
 
                 </form>
                 <form method="post" enctype="multipart/form-data">
                     <div class="form-group">
                         <label for="story">Choose Story:</label>
-                        <select required name="story" class="form-select mb-3 w-100" aria-label=".form-select-lg example">
+                        <select required id="storySelect" name="story" class="form-select mb-3 w-100" aria-label=".form-select-lg example">
                             <option value="">Select the story</option>
                             <?php
                             foreach ($stories as $story) :
-                                echo '<option value="' . $story['id'] . '">' . $story['name'] . '</option>';
+                                $selected = "";
+                                if ($story['id'] == $_GET['story']) {
+                                    $selected = "selected";
+                                }
+                                echo "<option value='" . $story['id'] . "'$selected>" . $story['name'] . "</option>";
                             endforeach;
                             ?>
                         </select>
@@ -145,6 +162,14 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         //When changing the radio buttons submit their form
         $('input[type=radio]').change(function() {
             $(this).closest("form").submit();
+        });
+
+        //When story selection changes, the selector changes, update the GET params
+        $('#storySelect').on('change', function() {
+            $('#storyId').attr('value', $('#storySelect').val())
+            //Get values and add to link
+            var getValues = "?videotype=" + $('input[type=radio]:checked').val() + "&story=" + $('#storySelect').val()
+            window.history.replaceState(null, null, getValues);
         });
 
         // YouTube Player API Reference for iframe Embeds
