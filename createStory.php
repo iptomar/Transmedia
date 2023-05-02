@@ -11,8 +11,10 @@ if (isset($_POST['submitButton'])) {
     // sql query para inserir dados na base de dados
     $sql = "INSERT INTO Story (name, description, author) VALUES (?, ?, ?)";
     $pdo->prepare($sql)->execute([$name, $description, $author]);
-  
-  }
+
+    $id = $pdo->lastInsertId();
+    header("location: create_options.php?id=$id");
+}
 
 ?>
 <!DOCTYPE html>
