@@ -30,6 +30,9 @@ if (session_status() === PHP_SESSION_NONE) {
       </li>
       <li class="nav-item">
         <a class="nav-link" href="addVideoToStory.php">Add Video</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" href="addAudioToStory.php">Add Audio</a>
       </li>';
       } ?>
     </ul>

@@ -139,14 +139,14 @@ VALUES
 -- Create Audio Table
 CREATE TABLE `audio` (
   `id` int(11) NOT NULL,
-  `id_historia` int(11) NOT NULL,
+  `id_story` int(11) NOT NULL,
   `audio` varchar(255) DEFAULT NULL,
-  `autor` varchar(255) DEFAULT NULL
+  `author` varchar(255) DEFAULT NULL
 ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4;
 
 -- Insert data to the table
 INSERT INTO
-  `audio` (`id`, `id_story`, `audio`, `autor`)
+  `audio` (`id`, `id_story`, `audio`, `author`)
 VALUES
   (9, 224, 'MeuSportingAudio.mov', 'filipeguia');
 
@@ -162,4 +162,6 @@ ALTER TABLE
 ADD
   PRIMARY KEY (`id`),
 ADD
-  KEY `id_story` (`id_story`);
+  KEY `id_story` (`id_story`),
+MODIFY
+  `id` int(11) NOT NULL AUTO_INCREMENT;
