@@ -28,6 +28,9 @@ if (session_status() === PHP_SESSION_NONE) {
       <li class="nav-item">
         <a class="nav-link" href="addVideoToStory.php">Add Video</a>
       </li>
+      <li class="nav-item">
+        <a class="nav-link" href="addAudioToStory.php">Add Audio</a>
+      </li>
     </ul>
     <?php
     //Verify if user is logged in, if he is instead of login and register button show logout button
