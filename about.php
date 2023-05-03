@@ -14,9 +14,19 @@ echo '<p>Tiago = '.password_hash("tiago123", PASSWORD_DEFAULT).'</p>';*/
 <!DOCTYPE html>
 <html>
   <head>
-    <title>Transmedia - Share Your Stories</title>
+    <title text-align: center>Transmedia - Share Your Stories</title>
+    <style>
+      h1, p {
+        font-family: Arial;
+      }
+    </style>
   </head>
   <body>
+    <?php
+        $currPage = 'index';
+        include "NavBar.php";
+        $index = 'index';
+    ?>
     <h1>Welcome to Transmedia</h1>
     <p>Transmedia is a platform where you can share your stories and videos about anything.</p>
     <?php
