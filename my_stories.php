@@ -40,7 +40,9 @@ $stories = $stmt->fetchAll(PDO::FETCH_DEFAULT);
             <?php endforeach; ?>
         </div>
     </div>
-
+    <?php
+    include "footer.php";
+    ?>
 </body>
 
 </html>

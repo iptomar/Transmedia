@@ -28,7 +28,7 @@ echo '<p>Tiago = '.password_hash("tiago123", PASSWORD_DEFAULT).'</p>';*/
         $index = 'index';
     ?>
     
-    <div class="content">
+    <div class="content mb-5">
         <div class = "content_text">
             <div class = "logo">
                 <img src="./assets/landing_logo.svg"></img>
