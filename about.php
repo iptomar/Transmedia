@@ -28,6 +28,7 @@ echo '<p>Tiago = '.password_hash("tiago123", PASSWORD_DEFAULT).'</p>';*/
         $index = 'index';
     ?>
     <h1>Welcome to Transmedia</h1>
+    <p></p>
     <p>Transmedia is a platform where you can share your stories and videos about anything.</p>
     <?php
         include "footer.php";
