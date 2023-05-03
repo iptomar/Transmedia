@@ -56,14 +56,11 @@ $videoFetch = $video->fetchAll(PDO::FETCH_ASSOC);
             ?>
         </p>
     </div>
-
-    
-
         <?php
         foreach($videoFetch as $videos){
-            echo '<div id="preview" class="embed-responsive embed-responsive-16by9 col-md-6 offset-md-3 rounded">';
+            echo '<div id="preview" class="embed-responsive col-md-4 offset-md-1 d-inline-block rounded" style="width:320px; height:180px";>';
             if ($videos["videoType"] == "file") {
-                echo '<video class ="embed-responsive-item" id="player" controls src="' . $videos["link"] . '"></video>';
+                echo '<video class ="embed-responsive-item" id="player" controls src="./files/story_'. $videos["storyId"]. '/video/' . $videos["link"] . '"></video>';
             } elseif ($videos["videoType"] == "text") {
                 echo '<iframe class ="embed-responsive-item" id="player" type="text/html" src="https://www.youtube.com/embed/' . $videos["link"] . '?enablejsapi=1"></iframe>'; //add iframe with src pointing to the video with this code
             }
