@@ -24,6 +24,9 @@ if (!isset($_GET["id"])) {
         <a href="#" class="btn btn-outline-primary mb-3" style="width:200px">Add Images</a><br>
         <a href="#" class="btn btn-outline-primary mb-3" style="width:200px">Add Text</a><br>
     </div>
+    <?php
+    include "footer.php";
+    ?>
 </body>
 
 </html>

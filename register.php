@@ -208,6 +208,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             usernameVerify()
         });
     </script>
+    <?php
+    include "footer.php";
+    ?>
 </body>
 
 </html>
