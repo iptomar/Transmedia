@@ -1,4 +1,11 @@
 <?php
+function alert($msg)
+{
+    echo "<script>
+        alert('$msg');
+    </script>";
+}
+
 function message_redirect($msg, $redirect)
 {
     echo "<script>
