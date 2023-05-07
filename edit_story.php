@@ -31,9 +31,19 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     if ($story["author"] != $_SESSION['user']) {
         message_redirect("ERROR: Something went wrong", "my_stories.php");
     }
+
+    // Fetch the story videos
+    $sql_videos = $pdo->prepare('SELECT id, link, storyId, videoType, storyOrder,duration FROM video WHERE storyId = ?');
+    $sql_videos->execute([$_GET['id']]);
+    $videos = $sql_videos->fetchAll(PDO::FETCH_ASSOC);
+
+    // Calculate total duration of all videos
+    $total_duration = 0;
+    foreach ($videos as $video) {
+        $total_duration += $video['duration'];
+    }
     $name = $story['name'];
     $description = $story['description'];
-
 }
 ?>
 <!DOCTYPE html>
@@ -65,6 +75,28 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                         <input class="form-control" id="description" required name="description" type="text" value="<?= $description ?>">
                     </div>
 
+                    <div class="form-group mb-3">
+                        <label for="description">Videos</label>
+                        <div class="w-100 mb-3">
+                        <div id="preview"></div></div>
+                        <div class="videos-wrapper">
+                            <?php
+                            $time = 0;
+                            foreach ($videos as $video) {
+                                echo "<div class='video-container' data-duration='" . $video["duration"] . "'>";
+                                if ($video["videoType"] == "file") {
+                                    echo '<video controls src="./files/story_' . $video["storyId"] . '/video/' . $video["link"] . '"></video>';
+                                } elseif ($video["videoType"] == "text") {
+                                    echo '<div class="player" data-video-id="' . $video["link"] . '"></div>';
+                                }
+                                echo '<span class="duration"></span>';
+
+                                echo "</div>";
+                            } ?>
+                        </div>
+                        <div class="mt-1 duration-line"></div>
+                    </div>
+
                     <div class="row">
                         <div class="col-6">
                             <button type="submit" name="submit" class="btn btn-primary w-100">Submit</button>
@@ -81,6 +113,144 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     include "footer.php";
     ?>
 
+    <script>
+        var videos = [];
+        const totalDuration = <?= $total_duration ?>;
+        var time = 0;
+
+        //Format the time
+        function timeFormat(duration) {
+            duration = parseInt(duration);
+            // Hours, minutes and seconds
+            const hrs = ~~(duration / 3600);
+            const mins = ~~((duration % 3600) / 60);
+            const secs = ~~duration % 60;
+            let ret = "";
+            if (hrs > 0) {
+                ret += "" + hrs + ":" + (mins < 10 ? "0" : "");
+            }
+            ret += "" + mins + ":" + (secs < 10 ? "0" : "");
+            ret += "" + secs;
+            return ret;
+        }
+
+        // YouTube Player API Reference for iframe Embeds
+        // https://developers.google.com/youtube/iframe_api_reference
+        var tag = document.createElement('script');
+        tag.src = "https://www.youtube.com/iframe_api";
+        var firstScriptTag = document.getElementsByTagName('script')[0];
+        firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+
+        var players = document.getElementsByClassName('player');
+        var playerObjects = [];
+
+        //After the Youtube FrameAPI is ready
+        function onYouTubeIframeAPIReady() {
+            for (var i = 0; i < players.length; i++) {
+                var player = players[i];
+                var videoId = player.getAttribute('data-video-id');
+                var playerObject = new YT.Player(player, {
+                    height: '390',
+                    width: '640',
+                    videoId: videoId,
+                    playerVars: {
+                        'autoplay': 0,
+                        'controls': 1
+                    },
+                });
+                playerObjects.push(playerObject);
+                var index = playerObjects.indexOf(playerObject);
+                playerObject.getIframe().setAttribute('data-index', index);
+            }
+
+            //Set some of the video-container div's parameters dynamically
+            setVideoContainer()
+        }
+
+        function previewVideo(nextVideo) {
+            const clonedVideo = nextVideo.cloneNode(true);
+            if (clonedVideo.tagName === 'IFRAME') {
+                clonedVideo.removeAttribute('class');
+                // Handle iframe video
+                const videoId = clonedVideo.dataset.videoId;
+                const playerObject = new YT.Player(clonedVideo, {
+                    height: '390',
+                    width: '640',
+                    videoId: videoId,
+                    playerVars: {
+                        'autoplay': 1,
+                        'controls': 1
+                    },
+                    events: {
+                        'onReady': onPreviewReady,
+                        'onStateChange': onPreviewChange
+                    }
+                });
+            } else if (clonedVideo.tagName === 'VIDEO') {
+                // Handle HTML5 video
+                clonedVideo.addEventListener("ended", function() {
+                    previewVideo(videos[videos.length - 1]);
+                });
+                clonedVideo.setAttribute('autoplay', 'true'); // add autoplay attribute to start playing the video
+                clonedVideo.setAttribute('controls', 'true'); // add controls attribute to display the video controls
+                clonedVideo.play();
+            }
+            const preview = document.querySelector('#preview');
+            //Add the Video to the preview div
+            preview.innerHTML = '';
+            preview.appendChild(clonedVideo);
+            preview.classList.add('embed-responsive', 'embed-responsive-16by9');
+        }
+        // The Youtube Frame API will call this function when the video player is ready.
+        function onPreviewReady(event) {
+            event.target.playVideo();
+        }
+
+        function onPreviewChange(event) {
+            //When youtube video ends
+            if (event.data == YT.PlayerState.ENDED) {
+                const iframeId = event.target.getIframe().id;
+                const matches = iframeId.match(/\d+/);
+                const videoArrayid = matches ? parseInt(matches[0]) : null;
+                //If there is more videos after in the array videos
+                if (videoArrayid < videos.length - 1) {
+                    //Start the preview of the next video
+                    previewVideo(videos[videoArrayid + 1])
+                }
+            }
+        }
+
+
+
+
+        function setVideoContainer() {
+            const containers = document.querySelectorAll('.videos-wrapper .video-container');
+            containers.forEach(container => {
+                //Add the video element to the videos array
+                const videoElement = container.querySelector('iframe, video');
+                //Set the id of the video with the format video_<index in the videos array>
+                videoElement.setAttribute('id', 'video_' + (videos.length));
+                videos.push(videoElement);
+
+                //Set the video width depending on it's length
+                const duration = parseInt(container.dataset.duration);
+                const percentage = (duration / totalDuration) * 100;
+                container.style.width = `${percentage}%`;
+                //Add to the time of the story the current video time
+                time += duration;
+                const durationElement = container.querySelector('.duration');
+                //Format the time of the video
+                durationElement.textContent = timeFormat(time);
+
+                container.addEventListener('click', () => {
+                    const iframeOrVideo = container.querySelector('iframe, video');
+                    previewVideo(iframeOrVideo)
+                });
+
+
+            });
+        }
+    </script>
 </body>
 
 </html>
