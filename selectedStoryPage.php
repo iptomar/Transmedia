@@ -4,10 +4,13 @@ include "./functions/useful.php";
 
 $story = $pdo->prepare('SELECT story.name,story.description,story.author FROM story WHERE story.id = ?');
 $video = $pdo->prepare('SELECT video.link,video.storyId,video.videoType,video.storyOrder FROM video WHERE video.storyId = ?');
+$audio = $pdo->prepare('SELECT audio.id,audio.id_story,audio.audio,audio.author FROM audio WHERE audio.id_story = ?');
 $story->execute([$_GET['id']]);
 $video->execute([$_GET['id']]);
+$audio->execute([$_GET['id']]);
 $storyFetch = $story->fetch(PDO::FETCH_ASSOC);
 $videoFetch = $video->fetchAll(PDO::FETCH_ASSOC);
+$audioFetch = $audio->fetchAll(PDO::FETCH_ASSOC);
 ?>
 
 <!DOCTYPE html>
@@ -65,10 +68,11 @@ $videoFetch = $video->fetchAll(PDO::FETCH_ASSOC);
             echo '</div>';
         }
         ?>
-    </div>
-    <?php
-    include "footer.php";
-    ?>
+        <?php
+        foreach($audioFetch as $audio){
+                echo '<audio controls src="./files/story_'. $audio["id_story"]. '/audio/' . $audio["audio"] . '"></audio>';
+        }
+        ?>
 </body>
 
 </html>
