@@ -14,6 +14,7 @@ echo '<p>Tiago = '.password_hash("tiago123", PASSWORD_DEFAULT).'</p>';*/
 <!DOCTYPE html>
 <html>
   <head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title text-align: center>Transmedia - Share Your Stories</title>
     <style>
       h1, p {
@@ -30,6 +31,9 @@ echo '<p>Tiago = '.password_hash("tiago123", PASSWORD_DEFAULT).'</p>';*/
     <h1>Welcome to Transmedia</h1>
     <p></p>
     <p>Transmedia is a platform where you can share your stories and videos about anything.</p>
-  </body>
-</html>
+  <?php
+  include "footer.php";
+  ?>
+</body>
 
+</html>

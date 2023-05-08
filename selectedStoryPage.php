@@ -1,6 +1,5 @@
 <?php
 require "config/connectdb.php";
-require "verify_login.php";
 include "./functions/useful.php";
 
 $story = $pdo->prepare('SELECT story.name,story.description,story.author FROM story WHERE story.id = ?');
@@ -16,7 +15,6 @@ $audioFetch = $audio->fetchAll(PDO::FETCH_ASSOC);
 
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -24,8 +22,8 @@ $audioFetch = $audio->fetchAll(PDO::FETCH_ASSOC);
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
     <title>Story Selected</title>
 </head>
-
 <body>
+    <div class="mb-3">
     <?php
     include "NavBar.php";
     ?>
@@ -59,7 +57,7 @@ $audioFetch = $audio->fetchAll(PDO::FETCH_ASSOC);
             ?>
         </p>
     </div>
-        <?php
+    <?php
         foreach($videoFetch as $videos){
             echo '<div id="preview" class="embed-responsive col-md-4 offset-md-1 d-inline-block rounded" style="width:320px; height:180px";>';
             if ($videos["videoType"] == "file") {

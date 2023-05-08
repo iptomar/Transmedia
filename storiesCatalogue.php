@@ -1,5 +1,4 @@
 <?php
-
 require "config/connectdb.php";
 
 $stmt = $pdo->prepare('SELECT id,name FROM story');
@@ -26,7 +25,7 @@ $stories = $stmt->fetchAll(PDO::FETCH_ASSOC);
         include "NavBar.php";
         $index = 'index';
     ?>
-    <div class="d-inline-block" style="max-width: 940px">
+    <div class="d-inline-block mb-5" style="max-width: 940px">
         <?php for ($i = 0; $i < count($stories); $i++) {
 
         ?>

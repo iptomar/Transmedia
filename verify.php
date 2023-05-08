@@ -42,3 +42,6 @@ require "NavBar.php";
         <a href="index.php"><img class="mt-2" style="width:80px;" src="assets/icon_home.svg"></a>
     </div>
 </div>
+<?php
+include "footer.php";
+?>
