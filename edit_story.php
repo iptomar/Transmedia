@@ -14,37 +14,30 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         header("location: selectedStoryPage.php?id=$id");
         exit();
     }
-    $name = $_POST['name'];
-    $description = $_POST['description'];
-    $qry = $pdo->prepare('UPDATE story SET name = ?, description = ? WHERE id = ?');
-    $result = $qry->execute([$_POST['name'],  $_POST['description'], $id]);
-    if ($qry->rowCount() > 0) {
-        message_redirect("Story was successfully updated", "selectedStoryPage.php?id=$id");
-    } else {
-        alert("Something went wrong while updating the story, please try again");
+    if (isset($_POST['submit'])) {
+        $name = $_POST['name'];
+        $description = $_POST['description'];
+        $qry = $pdo->prepare('UPDATE story SET name = ?, description = ? WHERE id = ?');
+        $result = $qry->execute([$_POST['name'],  $_POST['description'], $id]);
+        if ($qry->rowCount() > 0) {
+            message_redirect("Story was successfully updated", "selectedStoryPage.php?id=$id");
+        } else {
+            alert("Something went wrong while updating the story, please try again");
+        }
     }
-} else {
-    $sql_story = $pdo->prepare('SELECT name, description, author FROM story WHERE story.id = ?');
-    $sql_story->execute([$_GET['id']]);
-    $story = $sql_story->fetch(PDO::FETCH_ASSOC);
-    //If story does not belong to the current user send the user to the selectedStoryPage
-    if ($story["author"] != $_SESSION['user']) {
-        message_redirect("ERROR: Something went wrong", "my_stories.php");
-    }
-
-    // Fetch the story videos
-    $sql_videos = $pdo->prepare('SELECT id, link, storyId, videoType, storyOrder,duration FROM video WHERE storyId = ?');
-    $sql_videos->execute([$_GET['id']]);
-    $videos = $sql_videos->fetchAll(PDO::FETCH_ASSOC);
-
-    // Calculate total duration of all videos
-    $total_duration = 0;
-    foreach ($videos as $video) {
-        $total_duration += $video['duration'];
-    }
-    $name = $story['name'];
-    $description = $story['description'];
 }
+$sql_story = $pdo->prepare('SELECT name, description, author FROM story WHERE story.id = ?');
+$sql_story->execute([$_GET['id']]);
+$story = $sql_story->fetch(PDO::FETCH_ASSOC);
+//If story does not belong to the current user send the user to the selectedStoryPage
+if ($story["author"] != $_SESSION['user']) {
+    message_redirect("ERROR: Something went wrong", "my_stories.php");
+}
+
+
+$name = $story['name'];
+$description = $story['description'];
+
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -52,12 +45,35 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://www.youtube.com/iframe_api"></script>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
     <title>Edit story <?= $name ?></title>
     <link rel="stylesheet" href="./style/edit_story.css">
 </head>
 
 <body>
+
+    <div class="modal fade" id="addVideo" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-body">
+                    <?php include "addVideoToStory.php";
+                    // Fetch the story videos
+                    $sql_videos = $pdo->prepare('SELECT id, link, storyId, videoType, storyOrder,duration FROM video WHERE storyId = ?');
+                    $sql_videos->execute([$_GET['id']]);
+                    $videos = $sql_videos->fetchAll(PDO::FETCH_ASSOC);
+
+                    // Calculate total duration of all videos
+                    $total_duration = 0;
+                    foreach ($videos as $video) {
+                        $total_duration += $video['duration'];
+                    } ?>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
     <div class="container mt-3 mb-3">
         <div class="card">
             <div class="card-header text-center">Edit Story</div>
@@ -75,10 +91,28 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                         <input class="form-control" id="description" required name="description" type="text" value="<?= $description ?>">
                     </div>
 
-                    <div class="form-group mb-3">
-                        <label for="description">Videos</label>
-                        <div class="w-100 mb-3">
-                        <div id="preview"></div></div>
+                    <div class="row">
+                        <div class="col-6">
+                            <button type="submit" name="submit" class="btn btn-primary w-100">Submit</button>
+                        </div>
+                        <div class="col-6">
+                            <button type="submit" name="cancel" class="btn btn-danger w-100" formnovalidate>Cancel</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+        <div class="card mt-3">
+            <div class="card-header text-center">Edit Videos</div>
+            <div class="card-body">
+
+                <div class="form-group mb-3">
+                    <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#addVideo">Add Video</button>
+
+                    <div class="w-100 mb-3">
+                        <div id="preview"></div>
+                    </div>
+                    <div class="video-scroller">
                         <div class="videos-wrapper">
                             <?php
                             $time = 0;
@@ -96,19 +130,13 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                         </div>
                         <div class="mt-1 duration-line"></div>
                     </div>
-
-                    <div class="row">
-                        <div class="col-6">
-                            <button type="submit" name="submit" class="btn btn-primary w-100">Submit</button>
-                        </div>
-                        <div class="col-6">
-                            <button type="submit" name="cancel" class="btn btn-danger w-100" formnovalidate>Cancel</button>
-                        </div>
-                    </div>
-                </form>
+                </div>
             </div>
         </div>
+
+
     </div>
+
     <?php
     include "footer.php";
     ?>
@@ -232,6 +260,14 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 videoElement.setAttribute('id', 'video_' + (videos.length));
                 videos.push(videoElement);
 
+                if (totalDuration > 3600) {
+                    const wrapper = document.querySelector('.videos-wrapper');
+                    const percentageWrapper = (~~(totalDuration / 3600) * 10) + 100;
+                    const line = document.querySelector('.duration-line');
+                    line.style.width = `${percentageWrapper}%`;
+
+                    wrapper.style.width = `${percentageWrapper}%`;
+                }
                 //Set the video width depending on it's length
                 const duration = parseInt(container.dataset.duration);
                 const percentage = (duration / totalDuration) * 100;

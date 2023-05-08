@@ -19,7 +19,7 @@ if (!isset($_GET["id"])) {
 <body>
     <h3 class="w-100 text-center mt-5 mb-3">Story was successfully created</h3>
     <div class="w-100 text-center">
-        <a href="addVideoToStory.php?story=<?= $_GET["id"] ?>" class="btn btn-outline-primary mb-3" style="width:200px">Add Videos</a><br>
+        <a href="addVideoToStory.php?id=<?= $_GET["id"] ?>" class="btn btn-outline-primary mb-3" style="width:200px">Add Videos</a><br>
         <a href="#" class="btn btn-outline-primary mb-3" style="width:200px">Add Audio</a><br>
         <a href="#" class="btn btn-outline-primary mb-3" style="width:200px">Add Images</a><br>
         <a href="#" class="btn btn-outline-primary mb-3" style="width:200px">Add Text</a><br>
