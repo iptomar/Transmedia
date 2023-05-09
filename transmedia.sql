@@ -141,14 +141,11 @@ CREATE TABLE `audio` (
   `id` int(11) NOT NULL,
   `id_story` int(11) NOT NULL,
   `audio` varchar(255) DEFAULT NULL,
-  `author` varchar(255) DEFAULT NULL
+  `duration` int(11) NOT NULL,
+  `storyOrder` int(11) NOT NULL
 ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4;
 
--- Insert data to the table
-INSERT INTO
-  `audio` (`id`, `id_story`, `audio`, `author`)
-VALUES
-  (9, 224, 'MeuSportingAudio.mov', 'filipeguia');
+
 
 -- Add foreign key
 ALTER TABLE
@@ -164,4 +161,9 @@ ADD
 ADD
   KEY `id_story` (`id_story`),
 MODIFY
-  `id` int(11) NOT NULL AUTO_INCREMENT;
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+ ADD
+  UNIQUE KEY `storyOrder` (`id_story`, `storyOrder`);
+
+INSERT INTO `audio` (`id`, `id_story`, `audio`, `duration`, `storyOrder`) VALUES
+(1, 228, 'audio_1683677229.mp3', 107, 1);
