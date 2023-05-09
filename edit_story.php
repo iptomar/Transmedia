@@ -214,8 +214,6 @@ $description = $story['description'];
 
         //Format the time
         function timeFormat(duration) {
-            console.log("timeFormat")
-
             duration = parseInt(duration);
             // Hours, minutes and seconds
             const hrs = ~~(duration / 3600);
@@ -239,20 +237,14 @@ $description = $story['description'];
 
         var players = document.getElementsByClassName('player');
         var playerObjects = [];
+        //API is loaded 
         if (typeof YT !== 'undefined' && YT.loaded) {
-            console.log("LOADED")
             setYTPlayers()
             setVideoContainer()
 
-            //API is loaded
-        } else {
-            console.log("UNLOADED")
-
-        }
+        } 
         //After the Youtube FrameAPI is ready
         function onYouTubeIframeAPIReady() {
-            console.log("onYouTubeIframeAPIReady")
-
             setYTPlayers()
             //Set some of the video-container div's parameters dynamically
             setVideoContainer()
@@ -279,8 +271,6 @@ $description = $story['description'];
         }
 
         function previewVideo(nextVideo) {
-            console.log("SET previewVideo")
-
             const clonedVideo = nextVideo.cloneNode(true);
             if (clonedVideo.tagName === 'IFRAME') {
                 clonedVideo.removeAttribute('class');
@@ -320,8 +310,6 @@ $description = $story['description'];
         }
 
         function onPreviewChange(event) {
-            console.log("SET onPreviewChange")
-
             //When youtube video ends
             if (event.data == YT.PlayerState.ENDED) {
                 const iframeId = event.target.getIframe().id;
@@ -339,7 +327,6 @@ $description = $story['description'];
 
 
         function setVideoContainer() {
-            console.log("SET VIDEO CONTAINER")
             const containers = document.querySelectorAll('.videos-wrapper .video-container');
             containers.forEach(container => {
                 //Add the video element to the videos array
