@@ -86,14 +86,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['add_audio'])) {
                         <label for="audioFile">Choose Audio:</label>
                         <input accept=".mp3,.wav,.ogg" type="file" class="form-control-file" id="audioFile" name="my_audio">
                     </div>
-                    <button type="submit" name="add_audio" class="btn btn-primary">Add Audio</button>
+                    <button type="submit" name="add_audio" class="w-100 btn btn-primary" style="margin-top: 10px">Add Audio</button>
                 </form>
             </div>
         </div>
     </div>
-    <?php
-    include "footer.php";
-    ?>
     <script>
         //When the input used to select the video is changed
         $("#audioFile").on("change", function(evt) {

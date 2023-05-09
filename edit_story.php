@@ -173,6 +173,17 @@ foreach ($videos as $video) {
         </div>
     </div>
 
+    <div class="modal fade" id="addAudio" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-body">
+                    <?php include "addAudioToStory.php"; ?>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
     <div class="container mt-3 mb-3">
         <div class="card">
             <div class="card-header text-center">Edit Story</div>
@@ -207,6 +218,7 @@ foreach ($videos as $video) {
 
                 <div class="form-group mb-3">
                     <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#addVideo">Add Video</button>
+                    <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#addAudio">Add Audio</button>
 
                     <div class="w-100 mb-3">
                         <div id="preview"></div>
