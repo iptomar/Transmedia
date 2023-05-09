@@ -6,6 +6,17 @@ function alert($msg)
     </script>";
 }
 
+function reload_page()
+{
+    // build a query string from the GET parameters
+    $params = http_build_query($_GET); 
+    // get the current page URL
+    $pageUrl = $_SERVER['PHP_SELF']; 
+    // append the query string to the page URL
+    $url = $pageUrl . '?' . $params; 
+    header('Location: ' . $url); 
+}
+
 function message_redirect($msg, $redirect)
 {
     echo "<script>

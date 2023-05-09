@@ -15,7 +15,7 @@ $pattern = "/^(?:https?:\/\/)?(?:www\.)?(?:youtu\.be\/|youtube\.com\/(?:embed\/|
 
 
 
-if ($_SERVER["REQUEST_METHOD"] == "POST" && $_POST['add_video']) {
+if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['add_video'])) {
     //Get video type
     $type = $_POST["videotype"];
     //If no story was selected show error message and reload the page
@@ -79,6 +79,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && $_POST['add_video']) {
             SELECT ?,?,?,?,coalesce(MAX(storyOrder),0)+ 1 FROM video WHERE  storyId = ?;";
             $stmt = $pdo->prepare($sql);
             $stmt->execute([$storyId, $video, $type, $duration, $storyId]);
+            reload_page();
         } catch (Exception $e) {
             echo '<script>alert("ERROR occured while connecting to the database")</script>';
         }

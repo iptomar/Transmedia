@@ -19,32 +19,73 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $qry = $pdo->prepare('UPDATE story SET name = ?, description = ? WHERE id = ?');
         $result = $qry->execute([$_POST['name'],  $_POST['description'], $id]);
         if ($qry->rowCount() > 0) {
-            message_redirect("Story was successfully updated", "selectedStoryPage.php?id=$id");
+            message_redirect("Story was successfully updated", "edit_story.php?id=$id");
         } else {
             alert("Something went wrong while updating the story, please try again");
         }
-    } else if (isset($_POST['orderdown'])) {
-        $video_id = $_POST['orderdown'];
+    } else if (isset($_POST['orderdownVideo'])) {
+        //Turn the order of the video selected down
+        $video_id = $_POST['orderdownVideo'];
         $video_change = $pdo->prepare('SELECT id, storyOrder FROM video WHERE id = ?');
         $video_change->execute([$video_id]);
         $videoReorder = $video_change->fetch(PDO::FETCH_ASSOC);
         $current_order = $videoReorder['storyOrder'];
         $new_order = $current_order - 1;
-        swapValues($pdo, $id, $current_order, $new_order);
-    } else if (isset($_POST['orderup'])) {
-        $video_id = $_POST['orderup'];
+        if ($new_order == 0) {
+            message_redirect("Something went wrong  the value is zero", "edit_story.php?id=$id");
+        }
+        if (!swapValues($pdo, $id, $current_order, $new_order)) {
+            message_redirect("Something went wrong when changing the order", "edit_story.php?id=$id");
+        }
+    } else if (isset($_POST['orderupVideo'])) {
+        //Turn the order of the video selected up
+        $video_id = $_POST['orderupVideo'];
         $video_change = $pdo->prepare('SELECT id, storyOrder FROM video WHERE id = ?');
-        $video_change->execute([$_POST['orderup']]);
+        $video_change->execute([$_POST['orderupVideo']]);
         $videoReorder = $video_change->fetch(PDO::FETCH_ASSOC);
         $current_order = $videoReorder['storyOrder'];
         $new_order = $current_order + 1;
-        swapValues($pdo, $id, $current_order, $new_order);
+        if (!swapValues($pdo, $id, $current_order, $new_order)) {
+            message_redirect("Something went wrong when changing the order", "edit_story.php?id=$id");
+        }
+    } else if (isset($_POST['deleteVideo'])) {
+        //Delete the video selected
+        $video_id = $_POST['deleteVideo'];
+        $stmt = $pdo->prepare('SELECT id, storyId, storyOrder FROM video WHERE id = ?');
+        $stmt->execute([$video_id]);
+        $video_change =  $stmt->fetch(PDO::FETCH_ASSOC);
+
+        $sql = "DELETE FROM video WHERE id = ?";
+        //Update the storyOrder of the videos after the one deleted to reflet the change
+        $sql2 = "UPDATE video SET storyOrder = storyOrder - 1 WHERE storyOrder > ? and storyId = ?";
+
+        // start a transaction
+        $pdo->beginTransaction();
+
+        $stmt = $pdo->prepare($sql);
+        $stmt2 = $pdo->prepare($sql2);
+
+        if ($stmt->execute([$video_id]) && $stmt2->execute([$video_change['storyOrder'], $video_change['storyId']])) {
+            // commit the transaction
+            if (!$pdo->commit()) {
+                message_redirect("Something went wrong when deleting the video", "edit_story.php?id=$id");
+            }
+        } else {
+            //If a error occurs rollBack
+            $pdo->rollBack();
+            message_redirect("Something went wrong when deleting the video", "edit_story.php?id=$id");
+        }
     }
 }
 
+//Swap the values of the storyOrder
 function swapValues($pdo, $storyID, $value1, $value2)
 {
-    // prepare the SQL statement with placeholders
+
+    $new_order1 = -$value2;
+    $new_order2 = -$value1;
+
+    // Update the storyOrder to it's new values, but in negative, to avoid a unique key constraint violation.
     $sql1 = "UPDATE video SET storyOrder = 
             CASE
                 WHEN storyOrder = :order1 THEN :new_order1
@@ -52,16 +93,14 @@ function swapValues($pdo, $storyID, $value1, $value2)
             END 
         WHERE storyOrder IN (" . $value1 . ", " . $value2 . ") AND storyID = :id";
 
+    //Set the values changed to positive
     $sql2 = "UPDATE video SET storyOrder = -storyOrder 
     WHERE storyOrder IN (:new_order1, :new_order2) AND storyID = :id";
 
     // start a transaction
     $pdo->beginTransaction();
 
-    $new_order1 = -$value2;
-    $new_order2 = -$value1;
-
-    // prepare and execute the first statement
+    // prepare and execute the first statement, that commits the new values in negative
     $stmt1 = $pdo->prepare($sql1);
     $stmt1->bindParam(':new_order1', $new_order1);
     $stmt1->bindParam(':new_order2', $new_order2);
@@ -71,17 +110,21 @@ function swapValues($pdo, $storyID, $value1, $value2)
 
     $stmt1->execute();
 
-    // prepare and execute the second statement
+    // prepare and execute the second statement to return the values to positive
     $stmt2 = $pdo->prepare($sql2);
     $stmt2->execute([
         ':new_order1' => $new_order1,
         ':new_order2' => $new_order2,
         ':id' => $storyID
     ]);
-
     // commit the transaction
-    $pdo->commit();
+    if ($pdo->commit()) {
+        return true;
+    }
+    return false;
 }
+
+//Get the story
 $sql_story = $pdo->prepare('SELECT name, description, author FROM story WHERE story.id = ?');
 $sql_story->execute([$_GET['id']]);
 $story = $sql_story->fetch(PDO::FETCH_ASSOC);
@@ -94,6 +137,16 @@ if ($story["author"] != $_SESSION['user']) {
 $name = $story['name'];
 $description = $story['description'];
 
+// Fetch the story videos
+$sql_videos = $pdo->prepare('SELECT id, link, storyId, videoType, storyOrder,duration FROM video WHERE storyId = ? ORDER BY storyOrder;');
+$sql_videos->execute([$_GET['id']]);
+$videos = $sql_videos->fetchAll(PDO::FETCH_ASSOC);
+
+// Calculate total duration of all videos
+$total_duration = 0;
+foreach ($videos as $video) {
+    $total_duration += $video['duration'];
+}
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -113,17 +166,7 @@ $description = $story['description'];
         <div class="modal-dialog" role="document">
             <div class="modal-content">
                 <div class="modal-body">
-                    <?php include "addVideoToStory.php";
-                    // Fetch the story videos
-                    $sql_videos = $pdo->prepare('SELECT id, link, storyId, videoType, storyOrder,duration FROM video WHERE storyId = ?');
-                    $sql_videos->execute([$_GET['id']]);
-                    $videos = $sql_videos->fetchAll(PDO::FETCH_ASSOC);
-
-                    // Calculate total duration of all videos
-                    $total_duration = 0;
-                    foreach ($videos as $video) {
-                        $total_duration += $video['duration'];
-                    } ?>
+                    <?php include "addVideoToStory.php"; ?>
 
                 </div>
             </div>
@@ -144,7 +187,7 @@ $description = $story['description'];
                     <!-- Tell the user to insert the Description !-->
                     <div class="form-group">
                         <label for="description">Description</label>
-                        <input class="form-control" id="description" required name="description" type="text" value="<?= $description ?>">
+                        <input class="form-control" id="description" name="description" type="text" value="<?= $description ?>">
                     </div>
 
                     <div class="row">
@@ -175,12 +218,25 @@ $description = $story['description'];
                                 $time = 0;
                                 $numItems = count($videos);
                                 $i = 0;
-
                                 foreach ($videos as $video) {
-                                    if ($i != 0)
-                                        echo '<button type="submit" name="orderdown" value="' . $video["id"] . '" class=" btn-primary"><</button>';
-                                    $i++;
+
                                     echo "<div class='video-container' data-duration='" . $video["duration"] . "'>";
+                                    echo '<div class="container videoButtons p-0">
+                                            <div class="row p-0 m-0">';
+                                    if ($i != 0)
+                                        echo    '<div class="col-sm p-0">
+                                                        <button type="submit" name="orderdownVideo" value="' . $video["id"] . '" class="w-100 btn-primary"><</button>
+                                                    </div>';
+
+                                    echo    '<div class="col-sm  p-0">
+                                                    <button type="submit" onclick="confirmDelete()" id="deleteVideo" name="deleteVideo" value="' . $video["id"] . '" class="w-100  btn-danger">X</button>
+                                                </div>';
+                                    if ($i < $numItems - 1)
+                                        echo    '<div class="col-sm  p-0">
+                                                    <button type="submit" name="orderupVideo" value="' . $video["id"] . '" class="w-100 btn-primary">></button> 
+                                                </div>';
+                                    echo    '</div>
+                                        </div>';
                                     if ($video["videoType"] == "file") {
                                         echo '<video controls src="./files/story_' . $video["storyId"] . '/video/' . $video["link"] . '"></video>';
                                     } elseif ($video["videoType"] == "text") {
@@ -188,8 +244,7 @@ $description = $story['description'];
                                     }
                                     echo '<span class="duration"></span>';
                                     echo "</div>";
-                                    if ($i < $numItems)
-                                        echo '<button type="submit" name="orderup" value="' . $video["id"] . '" class=" btn-primary">></button>';
+                                    $i++;
                                 } ?>
                             </div>
                             <div class="mt-1 duration-line"></div>
@@ -208,6 +263,12 @@ $description = $story['description'];
     ?>
 
     <script>
+        function confirmDelete() {
+            const confirmed = confirm('Are you sure you want to delete this?');
+            if (!confirmed) {
+                event.preventDefault(); // prevent the form from submitting if the user doesn't confirm
+            }
+        }
         var videos = [];
         const totalDuration = <?= $total_duration ?>;
         var time = 0;
@@ -242,7 +303,7 @@ $description = $story['description'];
             setYTPlayers()
             setVideoContainer()
 
-        } 
+        }
         //After the Youtube FrameAPI is ready
         function onYouTubeIframeAPIReady() {
             setYTPlayers()
@@ -354,9 +415,15 @@ $description = $story['description'];
                 //Format the time of the video
                 durationElement.textContent = timeFormat(time);
 
-                container.addEventListener('click', () => {
-                    const iframeOrVideo = container.querySelector('iframe, video');
-                    previewVideo(iframeOrVideo)
+                container.addEventListener('click', (e) => {
+                    //Don't trigger if button is pressed
+                    if ($(e.target).is("button")) {
+                        return;
+                    } else {
+                        const iframeOrVideo = container.querySelector('iframe, video');
+                        previewVideo(iframeOrVideo)
+                    }
+
                 });
 
 
