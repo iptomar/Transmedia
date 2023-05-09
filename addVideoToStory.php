@@ -15,7 +15,7 @@ $pattern = "/^(?:https?:\/\/)?(?:www\.)?(?:youtu\.be\/|youtube\.com\/(?:embed\/|
 
 
 
-if ($_SERVER["REQUEST_METHOD"] == "POST") {
+if ($_SERVER["REQUEST_METHOD"] == "POST" && $_POST['add_video']) {
     //Get video type
     $type = $_POST["videotype"];
     //If no story was selected show error message and reload the page
@@ -160,6 +160,19 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 fileInput.setAttribute('type', 'file');
                 fileInput.setAttribute('accept', "video/*");
             }
+        }
+        // YouTube Player API Reference for iframe Embeds
+        // https://developers.google.com/youtube/iframe_api_reference
+        var tag = document.createElement('script');
+        tag.src = "https://www.youtube.com/iframe_api";
+        var firstScriptTag = document.getElementsByTagName('script')[0];
+        firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+
+        var players = document.getElementsByClassName('player');
+        var playerObjects = [];
+
+        //After the Youtube FrameAPI is ready
+        function onYouTubeIframeAPIReady() {
         }
 
         function initPlayer(id) {

@@ -13,8 +13,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     if (isset($_POST['cancel'])) {
         header("location: selectedStoryPage.php?id=$id");
         exit();
-    }
-    if (isset($_POST['submit'])) {
+    } else if (isset($_POST['submit'])) {
         $name = $_POST['name'];
         $description = $_POST['description'];
         $qry = $pdo->prepare('UPDATE story SET name = ?, description = ? WHERE id = ?');
@@ -24,7 +23,64 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         } else {
             alert("Something went wrong while updating the story, please try again");
         }
+    } else if (isset($_POST['orderdown'])) {
+        $video_id = $_POST['orderdown'];
+        $video_change = $pdo->prepare('SELECT id, storyOrder FROM video WHERE id = ?');
+        $video_change->execute([$video_id]);
+        $videoReorder = $video_change->fetch(PDO::FETCH_ASSOC);
+        $current_order = $videoReorder['storyOrder'];
+        $new_order = $current_order - 1;
+        swapValues($pdo, $id, $current_order, $new_order);
+    } else if (isset($_POST['orderup'])) {
+        $video_id = $_POST['orderup'];
+        $video_change = $pdo->prepare('SELECT id, storyOrder FROM video WHERE id = ?');
+        $video_change->execute([$_POST['orderup']]);
+        $videoReorder = $video_change->fetch(PDO::FETCH_ASSOC);
+        $current_order = $videoReorder['storyOrder'];
+        $new_order = $current_order + 1;
+        swapValues($pdo, $id, $current_order, $new_order);
     }
+}
+
+function swapValues($pdo, $storyID, $value1, $value2)
+{
+    // prepare the SQL statement with placeholders
+    $sql1 = "UPDATE video SET storyOrder = 
+            CASE
+                WHEN storyOrder = :order1 THEN :new_order1
+                WHEN storyOrder = :order2 THEN :new_order2
+            END 
+        WHERE storyOrder IN (" . $value1 . ", " . $value2 . ") AND storyID = :id";
+
+    $sql2 = "UPDATE video SET storyOrder = -storyOrder 
+    WHERE storyOrder IN (:new_order1, :new_order2) AND storyID = :id";
+
+    // start a transaction
+    $pdo->beginTransaction();
+
+    $new_order1 = -$value2;
+    $new_order2 = -$value1;
+
+    // prepare and execute the first statement
+    $stmt1 = $pdo->prepare($sql1);
+    $stmt1->bindParam(':new_order1', $new_order1);
+    $stmt1->bindParam(':new_order2', $new_order2);
+    $stmt1->bindParam(':id', $storyID);
+    $stmt1->bindParam(':order1', $value1);
+    $stmt1->bindParam(':order2', $value2);
+
+    $stmt1->execute();
+
+    // prepare and execute the second statement
+    $stmt2 = $pdo->prepare($sql2);
+    $stmt2->execute([
+        ':new_order1' => $new_order1,
+        ':new_order2' => $new_order2,
+        ':id' => $storyID
+    ]);
+
+    // commit the transaction
+    $pdo->commit();
 }
 $sql_story = $pdo->prepare('SELECT name, description, author FROM story WHERE story.id = ?');
 $sql_story->execute([$_GET['id']]);
@@ -112,24 +168,34 @@ $description = $story['description'];
                     <div class="w-100 mb-3">
                         <div id="preview"></div>
                     </div>
-                    <div class="video-scroller">
-                        <div class="videos-wrapper">
-                            <?php
-                            $time = 0;
-                            foreach ($videos as $video) {
-                                echo "<div class='video-container' data-duration='" . $video["duration"] . "'>";
-                                if ($video["videoType"] == "file") {
-                                    echo '<video controls src="./files/story_' . $video["storyId"] . '/video/' . $video["link"] . '"></video>';
-                                } elseif ($video["videoType"] == "text") {
-                                    echo '<div class="player" data-video-id="' . $video["link"] . '"></div>';
-                                }
-                                echo '<span class="duration"></span>';
+                    <form method="POST" action="edit_story.php?id=<?= $id; ?>">
+                        <div class="video-scroller">
+                            <div class="videos-wrapper">
+                                <?php
+                                $time = 0;
+                                $numItems = count($videos);
+                                $i = 0;
 
-                                echo "</div>";
-                            } ?>
+                                foreach ($videos as $video) {
+                                    if ($i != 0)
+                                        echo '<button type="submit" name="orderdown" value="' . $video["id"] . '" class=" btn-primary"><</button>';
+                                    $i++;
+                                    echo "<div class='video-container' data-duration='" . $video["duration"] . "'>";
+                                    if ($video["videoType"] == "file") {
+                                        echo '<video controls src="./files/story_' . $video["storyId"] . '/video/' . $video["link"] . '"></video>';
+                                    } elseif ($video["videoType"] == "text") {
+                                        echo '<div class="player" data-video-id="' . $video["link"] . '"></div>';
+                                    }
+                                    echo '<span class="duration"></span>';
+                                    echo "</div>";
+                                    if ($i < $numItems)
+                                        echo '<button type="submit" name="orderup" value="' . $video["id"] . '" class=" btn-primary">></button>';
+                                } ?>
+                            </div>
+                            <div class="mt-1 duration-line"></div>
                         </div>
-                        <div class="mt-1 duration-line"></div>
-                    </div>
+                    </form>
+
                 </div>
             </div>
         </div>
@@ -148,6 +214,8 @@ $description = $story['description'];
 
         //Format the time
         function timeFormat(duration) {
+            console.log("timeFormat")
+
             duration = parseInt(duration);
             // Hours, minutes and seconds
             const hrs = ~~(duration / 3600);
@@ -171,9 +239,27 @@ $description = $story['description'];
 
         var players = document.getElementsByClassName('player');
         var playerObjects = [];
+        if (typeof YT !== 'undefined' && YT.loaded) {
+            console.log("LOADED")
+            setYTPlayers()
+            setVideoContainer()
 
+            //API is loaded
+        } else {
+            console.log("UNLOADED")
+
+        }
         //After the Youtube FrameAPI is ready
         function onYouTubeIframeAPIReady() {
+            console.log("onYouTubeIframeAPIReady")
+
+            setYTPlayers()
+            //Set some of the video-container div's parameters dynamically
+            setVideoContainer()
+        }
+
+        function setYTPlayers() {
+
             for (var i = 0; i < players.length; i++) {
                 var player = players[i];
                 var videoId = player.getAttribute('data-video-id');
@@ -190,12 +276,11 @@ $description = $story['description'];
                 var index = playerObjects.indexOf(playerObject);
                 playerObject.getIframe().setAttribute('data-index', index);
             }
-
-            //Set some of the video-container div's parameters dynamically
-            setVideoContainer()
         }
 
         function previewVideo(nextVideo) {
+            console.log("SET previewVideo")
+
             const clonedVideo = nextVideo.cloneNode(true);
             if (clonedVideo.tagName === 'IFRAME') {
                 clonedVideo.removeAttribute('class');
@@ -235,6 +320,8 @@ $description = $story['description'];
         }
 
         function onPreviewChange(event) {
+            console.log("SET onPreviewChange")
+
             //When youtube video ends
             if (event.data == YT.PlayerState.ENDED) {
                 const iframeId = event.target.getIframe().id;
@@ -252,6 +339,7 @@ $description = $story['description'];
 
 
         function setVideoContainer() {
+            console.log("SET VIDEO CONTAINER")
             const containers = document.querySelectorAll('.videos-wrapper .video-container');
             containers.forEach(container => {
                 //Add the video element to the videos array
@@ -272,6 +360,7 @@ $description = $story['description'];
                 const duration = parseInt(container.dataset.duration);
                 const percentage = (duration / totalDuration) * 100;
                 container.style.width = `${percentage}%`;
+
                 //Add to the time of the story the current video time
                 time += duration;
                 const durationElement = container.querySelector('.duration');

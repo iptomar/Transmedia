@@ -15,7 +15,10 @@
     display: flex;
     gap: 1px;
     position: relative;
+}
 
+.edit-video {
+    display: inline-block;
 }
 
 .video-container {
@@ -25,7 +28,8 @@
     background-color: black;
     width: 0;
     z-index: 1;
-    min-width: 50px;
+    min-width: 60px;
+    margin: 0;
 }
 
 
