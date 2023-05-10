@@ -4,8 +4,12 @@
 }
 
 .preview-box{
-
     border: 1px solid rgba(0,0,0,.125);
+}
+
+.preview-title{
+    border: 1px solid rgba(0,0,0,.3);
+    background-color: rgba(0,0,0,.03);
 }
 
 .video-scroller {
@@ -36,7 +40,6 @@
     background-color: black;
     width: 0;
     z-index: 1;
-    min-width: 100px;
     margin: 0;
 }
 
@@ -44,9 +47,6 @@
     writing-mode: tb-rl;
     transform: rotate(-180deg);
 }
-
-
-
 
 
 .media-buttons{

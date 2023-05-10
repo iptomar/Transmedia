@@ -23,128 +23,12 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         } else {
             alert("Something went wrong while updating the story, please try again");
         }
-    } else if (isset($_POST['orderdownVideo'])) {
-        //Turn the order of the video selected down
-        $video_id = $_POST['orderdownVideo'];
-        $video_change = $pdo->prepare('SELECT id, storyOrder FROM video WHERE id = ?');
-        $video_change->execute([$video_id]);
-        $videoReorder = $video_change->fetch(PDO::FETCH_ASSOC);
-        $current_order = $videoReorder['storyOrder'];
-        $new_order = $current_order - 1;
-        if ($new_order == 0) {
-            message_redirect("Something went wrong  the value is zero", "edit_story.php?id=$id");
-        }
-        if (!swapValues($pdo, $id, $current_order, $new_order, "video", "storyOrder", "storyId")) {
-            message_redirect("Something went wrong when changing the order", "edit_story.php?id=$id");
-        }
-    } else if (isset($_POST['orderupVideo'])) {
-        //Turn the order of the video selected up
-        $video_id = $_POST['orderupVideo'];
-        $video_change = $pdo->prepare('SELECT id, storyOrder FROM video WHERE id = ?');
-        $video_change->execute([$_POST['orderupVideo']]);
-        $videoReorder = $video_change->fetch(PDO::FETCH_ASSOC);
-        $current_order = $videoReorder['storyOrder'];
-        $new_order = $current_order + 1;
-        if (!swapValues($pdo, $id, $current_order, $new_order, "video", "storyOrder", "storyId")) {
-            message_redirect("Something went wrong when changing the order", "edit_story.php?id=$id");
-        }
-    } else if (isset($_POST['deleteVideo'])) {
-        //Delete the video selected
-        $video_id = $_POST['deleteVideo'];
-        $stmt = $pdo->prepare('SELECT id, link, storyId, storyOrder, videoType FROM video WHERE id = ?');
-        $stmt->execute([$video_id]);
-        $video_change =  $stmt->fetch(PDO::FETCH_ASSOC);
-        $sql = "DELETE FROM video WHERE id = ?";
-        //Update the storyOrder of the videos after the one deleted to reflet the change
-        $sql2 = "UPDATE video SET storyOrder = storyOrder - 1 WHERE storyOrder > ? and storyId = ?";
-
-        $alter_video_file = $video_change['link'];
-        $storyId = $video_change['storyId'];
-        $continue = true;
-        if ($video_change['videoType'] == 'file' && delete_file("./files/story_$storyId/video/$alter_video_file")) {
-            $continue = true;
-        } else if ($video_change['videoType'] == 'text') {
-            $continue = true;
-        } else {
-            $continue = false;
-        }
-        //If video was successfully deleted, in case it's a video Type file, or if it's a valid videoType
-        if ($continue) {
-            // start a transaction
-            $pdo->beginTransaction();
-            //Run the command to delete the video from the DB
-            $stmt = $pdo->prepare($sql);
-            //Run the command to update the videos that had higher storyOrder values
-            $stmt2 = $pdo->prepare($sql2);
-            if ($stmt->execute([$video_id]) && $stmt2->execute([$video_change['storyOrder'], $video_change['storyId']])) {
-                // commit the transaction
-                if (!$pdo->commit()) {
-                    message_redirect("Something went wrong when deleting the video", "edit_story.php?id=$id");
-                }
-            } else {
-                //If a error occurs rollBack
-                $pdo->rollBack();
-                message_redirect("Something went wrong when deleting the video", "edit_story.php?id=$id");
-            }
-        } else {
-            message_redirect("Something went wrong when deleting the audio file", "edit_story.php?id=$id");
-        }
-    } else if (isset($_POST['orderdownAudio'])) {
-        //Turn the order of the video selected down
-        $media_id = $_POST['orderdownAudio'];
-        $media_change = $pdo->prepare('SELECT id, storyOrder FROM audio WHERE id = ?');
-        $media_change->execute([$media_id]);
-        $media_reorder = $media_change->fetch(PDO::FETCH_ASSOC);
-        $current_order = $media_reorder['storyOrder'];
-        $new_order = $current_order - 1;
-        if ($new_order == 0) {
-            message_redirect("Something went wrong  the value is zero", "edit_story.php?id=$id");
-        }
-        if (!swapValues($pdo, $id, $current_order, $new_order, "audio", "storyOrder", "id_story")) {
-            message_redirect("Something went wrong when changing the order", "edit_story.php?id=$id");
-        }
-    } else if (isset($_POST['orderupAudio'])) {
-        //Turn the order of the video selected up
-        $media_id = $_POST['orderupAudio'];
-        $media_change = $pdo->prepare('SELECT id, storyOrder FROM audio WHERE id = ?');
-        $media_change->execute([$media_id]);
-        $media_reorder = $media_change->fetch(PDO::FETCH_ASSOC);
-        $current_order = $media_reorder['storyOrder'];
-        $new_order = $current_order + 1;
-        if (!swapValues($pdo, $id, $current_order, $new_order, "audio", "storyOrder", "id_story")) {
-            message_redirect("Something went wrong when changing the order", "edit_story.php?id=$id");
-        }
-    } else if (isset($_POST['deleteAudio'])) {
-        //Delete the video selected
-        $media_id = $_POST['deleteAudio'];
-        $stmt = $pdo->prepare('SELECT id, audio, id_story, storyOrder FROM audio WHERE id = ?');
-        $stmt->execute([$media_id]);
-        $media_alter =  $stmt->fetch(PDO::FETCH_ASSOC);
-
-        $sql = "DELETE FROM audio WHERE id = ?";
-        //Update the storyOrder of the videos after the one deleted to reflet the change
-        $sql2 = "UPDATE audio SET storyOrder = storyOrder - 1 WHERE storyOrder > ? and id_story = ?";
-
-        $alter_audio_file = $media_alter['audio'];
-        if (delete_file("./files/story_$id/audio/$alter_audio_file")) {
-            // start a transaction
-            $pdo->beginTransaction();
-            $stmt = $pdo->prepare($sql);
-            $stmt2 = $pdo->prepare($sql2);
-            if ($stmt->execute([$media_id]) && $stmt2->execute([$media_alter['storyOrder'], $media_alter['id_story']])) {
-                // commit the transaction
-                if (!$pdo->commit()) {
-                    message_redirect("Something went wrong when deleting the audio", "edit_story.php?id=$id");
-                }
-            } else {
-                //If a error occurs rollBack
-                $pdo->rollBack();
-                message_redirect("Something went wrong when deleting the audio", "edit_story.php?id=$id");
-            }
-        } else {
-            echo "Error Deleating ./files/story_$id/audio/$alter_audio_file";
-            // message_redirect("Something went wrong when deleting the audio file", "edit_story.php?id=$id");
-        }
+    } else if (isset($_POST['orderdownVideo']) || isset($_POST['orderupVideo']) || isset($_POST['deleteVideo'])) {
+        //If it's to edit a video insert the edit_video file
+        require("edit_video.php");
+    } else if (isset($_POST['orderdownAudio']) || isset($_POST['orderupAudio']) || isset($_POST['deleteAudio'])) {
+        //If it's to edit a audo insert the edit_audio file
+        require("edit_audio.php");
     }
 }
 
@@ -297,10 +181,17 @@ if ($audios_duration > $total_duration) {
             </div>
         </div>
         <div class="card mt-3">
-            <div class="card-header text-center">Edit Media</div>
+            <div class="card-header text-center">
+                Edit Media
+                <p class="m-0 p-0" style="font-size: 14px;">Changes made to this form are permanent</p>
+            </div>
 
-            <div class="preview-box">
-                <div class="w-100 mb-3">
+            <div class="preview-box w-0">
+                <div class="w-100 mb-3 text-center">
+                    <div class="p-0 mb-3 w-100 preview-title" style="font-size: 14px;">
+                        <p class="m-0 p-0">Preview Media</p>
+                        <p class="m-0 p-0" style="font-size: 10px;">Click on any media to preview it</p>
+                    </div>
                     <div id="preview"></div>
                 </div>
             </div>
@@ -325,18 +216,18 @@ if ($audios_duration > $total_duration) {
                                 foreach ($videos as $video) {
 
                                     echo "<div class='video-container' data-duration='" . $video["duration"] . "'>";
-                                    echo '<div class="container media-buttons p-0">
+                                    echo '<div class="media-buttons p-0">
                                             <div class="row p-0 m-0">';
                                     if ($i != 0)
-                                        echo    '<div class="col-sm p-0">
+                                        echo    '<div class="col p-0">
                                                         <button type="submit" name="orderdownVideo" value="' . $video["id"] . '" class="w-100 btn-primary"><</button>
                                                     </div>';
 
-                                    echo    '<div class="col-sm  p-0">
+                                    echo    '<div class="col  p-0">
                                                     <button type="submit" onclick="confirmDelete()" id="deleteVideo" name="deleteVideo" value="' . $video["id"] . '" class="w-100  btn-danger">X</button>
                                                 </div>';
                                     if ($i < $numItems - 1)
-                                        echo    '<div class="col-sm  p-0">
+                                        echo    '<div class="col  p-0">
                                                     <button type="submit" name="orderupVideo" value="' . $video["id"] . '" class="w-100 btn-primary">></button> 
                                                 </div>';
                                     echo    '</div>
@@ -361,17 +252,17 @@ if ($audios_duration > $total_duration) {
                                 $i = 0;
                                 foreach ($audios as $audio) {
                                     echo "<div class='audio-container' data-duration='" . $audio["duration"] . "'>";
-                                    echo '<div class="container media-buttons p-0">
+                                    echo '<div class="media-buttons p-0">
                                             <div class="row p-0 m-0">';
                                     if ($i != 0)
-                                        echo    '<div class="col-sm p-0">
+                                        echo    '<div class="col p-0">
                                                     <button type="submit" name="orderdownAudio" value="' . $audio["id"] . '" class="w-100 btn-primary"><</button>
                                                 </div>';
-                                    echo        '<div class="col-sm  p-0">
+                                    echo        '<div class="col  p-0">
                                                     <button type="submit" onclick="confirmDelete()" id="deleteAudio" name="deleteAudio" value="' . $audio["id"] . '" class="w-100  btn-danger">X</button>
                                                 </div>';
                                     if ($i < $numItems - 1)
-                                        echo    '<div class="col-sm  p-0">
+                                        echo    '<div class="col  p-0">
                                                     <button type="submit" name="orderupAudio" value="' . $audio["id"] . '" class="w-100 btn-primary">></button> 
                                                 </div>';
                                     echo    '</div>
@@ -546,6 +437,9 @@ if ($audios_duration > $total_duration) {
 
         function setVideoContainer() {
             time = 0;
+            if (totalDuration > 3600) {
+                adjustWrapperLineSize(0);
+            }
             const containers = document.querySelectorAll('.medias-wrapper .video-container');
             containers.forEach(container => {
                 //Add the video element to the videos array
@@ -553,19 +447,20 @@ if ($audios_duration > $total_duration) {
                 //Set the id of the video with the format video_<index in the videos array>
                 videoElement.setAttribute('id', 'video_' + (videos.length));
                 videos.push(videoElement);
+                $smallAdjust = 100
+                //Adjust the size so that the container always has at least 100px of width
+                do {
+                    //Set the video width depending on it's length
+                    var duration = parseInt(container.dataset.duration);
+                    var percentage = (duration / totalDuration) * 100;
+                    container.style.width = `${percentage}%`;
+                    if (container.clientWidth < 100) {
+                        adjustWrapperLineSize($smallAdjust);
+                        $smallAdjust += 10
+                    }
+                } while (container.clientWidth < 100)
 
-                if (totalDuration > 3600) {
-                    const wrapper = document.querySelector('.medias-wrapper');
-                    const percentageWrapper = (~~(totalDuration / 3600) * 10) + 100;
-                    const line = document.querySelector('.duration-line');
-                    line.style.width = `${percentageWrapper}%`;
 
-                    wrapper.style.width = `${percentageWrapper}%`;
-                }
-                //Set the video width depending on it's length
-                const duration = parseInt(container.dataset.duration);
-                const percentage = (duration / totalDuration) * 100;
-                container.style.width = `${percentage}%`;
 
                 //Add to the time of the story the current video time
                 time += duration;
@@ -592,25 +487,31 @@ if ($audios_duration > $total_duration) {
 
         function setAudioContainer() {
             time = 0;
-            console.log("SET AUDIO")
             const containers = document.querySelectorAll('.medias-wrapper .audio-container');
             containers.forEach(container => {
-                console.log("CONTAINERS")
                 //Add the video element to the videos array
                 const audioElement = container.querySelector('audio');
                 //Set the id of the video with the format video_<index in the videos array>
                 audioElement.setAttribute('id', 'audio_' + (audios.length));
                 audios.push(audioElement);
 
-                //Set the video width depending on it's length
-                const duration = parseInt(container.dataset.duration);
-                const percentage = (duration / totalDuration) * 100;
-                container.style.width = `${percentage}%`;
+                $smallAdjust = 100
+                //Adjust the size so that the container always has at least 100px of width
+                do {
+                    //Set the video width depending on it's length
+                    var duration = parseInt(container.dataset.duration);
+                    var percentage = (duration / totalDuration) * 100;
+                    container.style.width = `${percentage}%`;
+                    if (container.clientWidth < 100) {
+                        adjustWrapperLineSize($smallAdjust);
+                        $smallAdjust += 10
+                    }
+                } while (container.clientWidth < 100)
+
 
                 //Add to the time of the story the current video time
                 time += duration;
                 const durationElement = container.querySelector('.duration');
-                console.log(durationElement)
                 //Format the time of the video
                 durationElement.textContent = timeFormat(time);
 
@@ -627,6 +528,21 @@ if ($audios_duration > $total_duration) {
 
 
             });
+        }
+
+        function adjustWrapperLineSize(perct) {
+            const wrappers = document.querySelectorAll('.medias-wrapper');
+            const percentageWrapper = (~~(totalDuration / 3600) * 10) + 100 + perct;
+
+            wrappers.forEach(wrapper => {
+                wrapper.style.width = `${percentageWrapper}%`;
+            });
+
+            const lines = document.querySelectorAll('.duration-line');
+            lines.forEach(line => {
+                line.style.width = `${percentageWrapper}%`;
+            });
+
         }
     </script>
 </body>

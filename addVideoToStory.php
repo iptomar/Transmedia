@@ -201,7 +201,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['add_video'])) {
             var input = document.getElementById('chooseVideo');
             //If the type choosen is file
             if (fileTypeSelected == "file") {
-                console.log(fileType)
                 $("#previewAdd").html('')
                 document.getElementById("durationVideo").setAttribute('value', "");
                 var fileType = this.files[0]["type"];
