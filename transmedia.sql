@@ -94,7 +94,8 @@ VALUES
   (228, 'Benfica', '', 'tiago'),
   (229, 'Porto', '', 'joana'),
   (230, 'Desporto', '', 'tiago'),
-  (231, 'teste', 'lorem ipsum', 'joana');
+  (231, 'teste', 'lorem ipsum', 'joana'),
+  (232, 'teste3', 'lorem', 'joana');
 
 -- --------------------------------------------------------
 -- Structure of table `video`
@@ -134,7 +135,8 @@ VALUES
   (2, 224, 1, 'CKThDImMq3o', 103, 'text'),
   (3, 228, 2, 'HihzFAZ1XbA', 415, 'text'),
   (4, 1, 1, 'FGlhWPwrkDg', 196, 'text'),
-  (5, 1, 2, 'mDYqT0_9VR4', 242, 'text');
+  (5, 1, 2, 'mDYqT0_9VR4', 242, 'text'),
+  (6, 232, 1, 'video_1683714500.mp4', 24, 'file');
 
 -- Create Audio Table
 CREATE TABLE `audio` (
@@ -148,7 +150,13 @@ CREATE TABLE `audio` (
 INSERT INTO
   `audio` (`id`, `id_story`, `audio`, `author`)
 VALUES
-  (9, 224, 'MeuSportingAudio.mov', 'filipeguia');
+  (1, 232, 'audio_1683714672.mp3', 'joana'),
+  (2, 232, 'audio_1683714865.mp3', 'joana'),
+  (3, 232, 'audio_1683714875.mp3', 'joana'),
+  (4, 232, 'audio_1683714886.mp3', 'joana'),
+  (5, 232, 'audio_1683714893.mp3', 'joana'),
+  (6, 232, 'audio_1683714984.mp3', 'joana'),
+  (7, 232, 'audio_1683714997.mp3', 'joana');
 
 -- Add foreign key
 ALTER TABLE
