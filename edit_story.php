@@ -11,71 +11,29 @@ $name = '';
 $description = '';
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     if (isset($_POST['cancel'])) {
+        // If the user clicked cancel, redirect them to the story page and exit
         header("location: selectedStoryPage.php?id=$id");
         exit();
     } else if (isset($_POST['submit'])) {
+        // If the user clicked submit, update the story with the new name and description
         $name = $_POST['name'];
         $description = $_POST['description'];
         $qry = $pdo->prepare('UPDATE story SET name = ?, description = ? WHERE id = ?');
         $result = $qry->execute([$_POST['name'],  $_POST['description'], $id]);
         if ($qry->rowCount() > 0) {
+            // If the update was successful, redirect to the edit page with a success message
             message_redirect("Story was successfully updated", "edit_story.php?id=$id");
         } else {
+            // If the update failed, display an error message
             alert("Something went wrong while updating the story, please try again");
         }
     } else if (isset($_POST['orderdownVideo']) || isset($_POST['orderupVideo']) || isset($_POST['deleteVideo'])) {
-        //If it's to edit a video insert the edit_video file
+        //If the user clicked a button that edits, or deletes, a video insert the edit_video file
         require("edit_video.php");
     } else if (isset($_POST['orderdownAudio']) || isset($_POST['orderupAudio']) || isset($_POST['deleteAudio'])) {
-        //If it's to edit a audo insert the edit_audio file
+        //If the user clicked a button that edits, or deletes, a audio  the edit_audio file
         require("edit_audio.php");
     }
-}
-
-//Swap the values of the storyOrder
-function swapValues($pdo, $storyID, $value1, $value2, $nameTable, $nameField1, $nameStoryId)
-{
-
-    $new_order1 = -$value2;
-    $new_order2 = -$value1;
-
-    // Update the storyOrder to it's new values, but in negative, to avoid a unique key constraint violation.
-    $sql1 = "UPDATE $nameTable SET $nameField1 = 
-            CASE
-                WHEN $nameField1 = :order1 THEN :new_order1
-                WHEN $nameField1 = :order2 THEN :new_order2
-            END 
-        WHERE $nameField1 IN (" . $value1 . ", " . $value2 . ") AND $nameStoryId = :id";
-
-    //Set the values changed to positive
-    $sql2 = "UPDATE $nameTable SET $nameField1 = -$nameField1 
-    WHERE $nameField1 IN (:new_order1, :new_order2) AND $nameStoryId = :id";
-
-    // start a transaction
-    $pdo->beginTransaction();
-
-    // prepare and execute the first statement, that commits the new values in negative
-    $stmt1 = $pdo->prepare($sql1);
-    $stmt1->bindParam(':new_order1', $new_order1);
-    $stmt1->bindParam(':new_order2', $new_order2);
-    $stmt1->bindParam(':id', $storyID);
-    $stmt1->bindParam(':order1', $value1);
-    $stmt1->bindParam(':order2', $value2);
-
-    $stmt1->execute();
-
-    // prepare and execute the second statement to return the values to positive
-    $stmt2 = $pdo->prepare($sql2);
-    $stmt2->execute([
-        ':new_order1' => $new_order1,
-        ':new_order2' => $new_order2,
-        ':id' => $storyID
-    ]);
-    // commit the transaction
-    if ($pdo->commit()) {
-        return true;
-    }
-    return false;
 }
 
 //Get the story
@@ -291,18 +249,26 @@ if ($audios_duration > $total_duration) {
     ?>
 
     <script>
+        // Function prompts the user to confirm the delete before submitting the form
         function confirmDelete() {
             const confirmed = confirm('Are you sure you want to delete this?');
             if (!confirmed) {
                 event.preventDefault(); // prevent the form from submitting if the user doesn't confirm
             }
         }
+        // An array to store video file data
         var videos = [];
+
+        // An array to store audio file data
         var audios = [];
+
+        // The total duration of audio or video files, the sum of duration that is larger
         const totalDuration = <?= $total_duration ?>;
+
+
         var time = 0;
 
-        //Format the time
+        // Function that formats the duration of the audio and video files into hours, minutes, and seconds
         function timeFormat(duration) {
             duration = parseInt(duration);
             // Hours, minutes and seconds
@@ -360,12 +326,17 @@ if ($audios_duration > $total_duration) {
             }
         }
 
+        // Receives a video element and displays it the preview element
         function previewVideo(nextVideo) {
+            // Clone the video element
             const clonedVideo = nextVideo.cloneNode(true);
+            // Check if the cloned video is an iframe
             if (clonedVideo.tagName === 'IFRAME') {
+                // Remove class attribute
                 clonedVideo.removeAttribute('class');
-                // Handle iframe video
+                // Get video ID from data attribute
                 const videoId = clonedVideo.dataset.videoId;
+                // Create a new YouTube player object with the video ID and settings
                 const playerObject = new YT.Player(clonedVideo, {
                     height: '390',
                     width: '640',
@@ -375,13 +346,16 @@ if ($audios_duration > $total_duration) {
                         'controls': 1
                     },
                     events: {
-                        'onReady': onPreviewReady,
-                        'onStateChange': onPreviewChange
+                        'onReady': onPreviewVideoReady,
+                        'onStateChange': onPreviewVideoChange
                     }
                 });
-            } else if (clonedVideo.tagName === 'VIDEO') {
+            }
+            // Check if the cloned video is a HTML5 video element 
+            else if (clonedVideo.tagName === 'VIDEO') {
                 // Handle HTML5 video
                 clonedVideo.addEventListener("ended", function() {
+                    // Play the last video in the array when current video ends
                     previewVideo(videos[videos.length - 1]);
                 });
                 clonedVideo.setAttribute('autoplay', 'true'); // add autoplay attribute to start playing the video
@@ -389,44 +363,57 @@ if ($audios_duration > $total_duration) {
                 clonedVideo.play();
             }
             const preview = document.querySelector('#preview');
-            //Add the Video to the preview div
+            // Get the preview element and replace its contents with the cloned video
             preview.innerHTML = '';
             preview.appendChild(clonedVideo);
+            // Add CSS classes to make the preview element responsive
             preview.classList.add('embed-responsive', 'embed-responsive-16by9');
         }
 
+        // Preview an audio element
         function previewAudio(nextAudio) {
+            // Clone the audio element
             const clonedAudio = nextAudio.cloneNode(true);
+            // Check if the cloned element is an audio element
             if (clonedAudio.tagName === 'AUDIO') {
-                // Handle HTML5 video
+                // Handle when the audio ends by replaying the last audio
                 clonedAudio.addEventListener("ended", function() {
                     previewAudio(audios[audios.length - 1]);
                 });
-                clonedAudio.setAttribute('autoplay', 'true'); // set autoplay attribute to start playing the audio
-                clonedAudio.setAttribute('controls', 'true'); // set controls attribute to display the audio controls
+                // Set autoplay attribute to start playing the audio
+                clonedAudio.setAttribute('autoplay', 'true');
+                // Set controls attribute to display the audio controls
+                clonedAudio.setAttribute('controls', 'true');
+                // Start playing the audio
                 clonedAudio.play();
             }
+            // Get the preview element
             const preview = document.querySelector('#preview');
-            //Add the Video to the preview div
+            // Clear any existing content in the preview element
             preview.innerHTML = '';
+            // Add the cloned audio element to the preview element
             preview.appendChild(clonedAudio);
+            // Add CSS classes to the preview element
             preview.className = 'w-100 mt-3';
         }
 
         // The Youtube Frame API will call this function when the video player is ready.
-        function onPreviewReady(event) {
+        function onPreviewVideoReady(event) {
+            // Play the video when it is ready
             event.target.playVideo();
         }
 
-        function onPreviewChange(event) {
-            //When youtube video ends
+        function onPreviewVideoChange(event) {
+            // When the YouTube video ends
             if (event.data == YT.PlayerState.ENDED) {
+                // Get the ID of the iframe
                 const iframeId = event.target.getIframe().id;
+                // Extract the video ID from the iframe ID using a regular expression
                 const matches = iframeId.match(/\d+/);
                 const videoArrayid = matches ? parseInt(matches[0]) : null;
-                //If there is more videos after in the array videos
+                // If there are more videos after the current one in the array
                 if (videoArrayid < videos.length - 1) {
-                    //Start the preview of the next video
+                    // Start the preview of the next video
                     previewVideo(videos[videoArrayid + 1])
                 }
             }
@@ -435,114 +422,124 @@ if ($audios_duration > $total_duration) {
 
 
 
+        // Function to set the video container
         function setVideoContainer() {
+            // Initialize time to zero
             time = 0;
+            // If the total duration is greater than 3600 seconds, adjust the wrapper and the line size
             if (totalDuration > 3600) {
                 adjustWrapperLineSize(0);
             }
+
+            // Get all the video containers in the story 
             const containers = document.querySelectorAll('.medias-wrapper .video-container');
             containers.forEach(container => {
-                //Add the video element to the videos array
                 const videoElement = container.querySelector('iframe, video');
-                //Set the id of the video with the format video_<index in the videos array>
                 videoElement.setAttribute('id', 'video_' + (videos.length));
+                //add videoElement to the videos array
                 videos.push(videoElement);
-                $smallAdjust = 100
-                //Adjust the size so that the container always has at least 100px of width
-                do {
-                    //Set the video width depending on it's length
-                    var duration = parseInt(container.dataset.duration);
-                    var percentage = (duration / totalDuration) * 100;
-                    container.style.width = `${percentage}%`;
-                    if (container.clientWidth < 100) {
-                        adjustWrapperLineSize($smallAdjust);
-                        $smallAdjust += 10
-                    }
-                } while (container.clientWidth < 100)
 
+                // Get the duration of the video 
+                var duration = parseInt(container.dataset.duration);
+                adjustContainer(container, duration);
 
-
-                //Add to the time of the story the current video time
+                // Add the duration of the current video to the video time passed and format the time element
                 time += duration;
                 const durationElement = container.querySelector('.duration');
                 //Format the time of the video
                 durationElement.textContent = timeFormat(time);
 
+                // Add a click listener to the container that will preview the video when clicked
                 container.addEventListener('click', (e) => {
                     //Don't trigger if button is pressed
                     if ($(e.target).is("button")) {
+                        // If a button was clicked, don't preview the video
                         return;
                     } else {
+                        // If not, get the iframe or video element and preview the video
                         const iframeOrVideo = container.querySelector('iframe, video');
                         previewVideo(iframeOrVideo)
                     }
-
                 });
-
-
             });
 
+            // Call the setAudioContainer function
             setAudioContainer();
         }
 
+        // This function sets up the audio containers in the story
         function setAudioContainer() {
             time = 0;
+            // Get all the audio containers in the story
             const containers = document.querySelectorAll('.medias-wrapper .audio-container');
+            // Loop through each container
             containers.forEach(container => {
-                //Add the video element to the videos array
                 const audioElement = container.querySelector('audio');
-                //Set the id of the video with the format video_<index in the videos array>
+                // Set the id of the audio with the format audio_<index in the audios array>
                 audioElement.setAttribute('id', 'audio_' + (audios.length));
+                // Add the audio element to the audios array
                 audios.push(audioElement);
 
-                $smallAdjust = 100
-                //Adjust the size so that the container always has at least 100px of width
-                do {
-                    //Set the video width depending on it's length
-                    var duration = parseInt(container.dataset.duration);
-                    var percentage = (duration / totalDuration) * 100;
-                    container.style.width = `${percentage}%`;
-                    if (container.clientWidth < 100) {
-                        adjustWrapperLineSize($smallAdjust);
-                        $smallAdjust += 10
-                    }
-                } while (container.clientWidth < 100)
+                // Get the duration of the audio 
+                var duration = parseInt(container.dataset.duration);
+                adjustContainer(container, duration)
 
-
-                //Add to the time of the story the current video time
+                // Add to the time of the story the current audio time
                 time += duration;
                 const durationElement = container.querySelector('.duration');
-                //Format the time of the video
+                // Format the time of the audio
                 durationElement.textContent = timeFormat(time);
 
+                // Add click event listener to the container
                 container.addEventListener('click', (e) => {
-                    //Don't trigger if button is pressed
+                    // Don't trigger if button is pressed
                     if ($(e.target).is("button")) {
                         return;
                     } else {
                         const audio = container.querySelector('audio');
+                        // Preview the audio when container is clicked
                         previewAudio(audio);
                     }
 
                 });
-
-
             });
         }
 
+        // This function adjusts the size of the media wrapper and duration lines 
+        //The perct parameter represents the additional percentage to be added to the width of the wrappers and lines.
         function adjustWrapperLineSize(perct) {
+            //Get all media wrappers
             const wrappers = document.querySelectorAll('.medias-wrapper');
+            //Calculate the base percentage of the wrapper size, with a minimum of 100%
             const percentageWrapper = (~~(totalDuration / 3600) * 10) + 100 + perct;
 
+            //Set the width of each wrapper to the calculated percentage
             wrappers.forEach(wrapper => {
                 wrapper.style.width = `${percentageWrapper}%`;
             });
 
+            //Get all duration lines
             const lines = document.querySelectorAll('.duration-line');
+            //Set the width of each line to the calculated percentage
             lines.forEach(line => {
                 line.style.width = `${percentageWrapper}%`;
             });
 
+        }
+
+        function adjustContainer(containerToAdjust, durationContainer) {
+            // Initialize the smallAdjust variable to 100
+            var smallAdjust = 100;
+            do {
+                // Set the audio width depending on its length
+                var percentage = (durationContainer / totalDuration) * 100;
+                containerToAdjust.style.width = `${percentage}%`;
+                // If the container width is less than 100px, adjust the line size
+                if (containerToAdjust.clientWidth < 100) {
+                    adjustWrapperLineSize(smallAdjust);
+                    smallAdjust += 10;
+                }
+            } while (containerToAdjust.clientWidth < 100);
         }
     </script>
 </body>
