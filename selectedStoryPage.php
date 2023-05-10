@@ -26,6 +26,9 @@ $audioFetch = $audio->fetchAll(PDO::FETCH_ASSOC);
     <div class="mb-3">
     <?php
     include "NavBar.php";
+    if ($storyFetch['author'] == $_SESSION['user']) {
+        echo"<a class='btn btn-primary mt-2 mt-2' href='edit_story.php?id=".$_GET['id']."'>Edit Story</a>";
+    }
     ?>
     <div class="Name">
         <label for="name" style="font-size:20px; font-weight: bold;">Name</label>
@@ -40,7 +43,7 @@ $audioFetch = $audio->fetchAll(PDO::FETCH_ASSOC);
         <label for="description" style="font-size:20px; font-weight: bold;">Description</label>
         <p>
             <?php
-            if (print($storyFetch['description'] == null)) {
+            if ($storyFetch['description'] == null) {
                 print("no description");
             } else {
                 print($storyFetch['description']);
