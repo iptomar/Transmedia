@@ -13,7 +13,7 @@ if (isset($_POST['submitButton'])) {
     $pdo->prepare($sql)->execute([$name, $description, $author]);
 
     $id = $pdo->lastInsertId();
-    header("location: create_options.php?id=$id");
+    header("location: edit_story.php?id=$id");
 }
 
 ?>
