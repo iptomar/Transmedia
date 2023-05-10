@@ -21,6 +21,7 @@
     gap: 1px;
     position: relative;
     align-items: start;
+    background-color: #3f3f3f;
 }
 
 .edit-video {
@@ -39,11 +40,16 @@
     margin: 0;
 }
 
+.rotated {
+    writing-mode: tb-rl;
+    transform: rotate(-180deg);
+}
 
 
 
 
-.videoButtons{
+
+.media-buttons{
     z-index: 2;
 }
 

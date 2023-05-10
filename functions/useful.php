@@ -8,14 +8,12 @@ function alert($msg)
 
 function reload_page()
 {
-    // build a query string from the GET parameters
-    $params = http_build_query($_GET); 
-    // get the current page URL
-    $pageUrl = $_SERVER['PHP_SELF']; 
-    // append the query string to the page URL
-    $url = $pageUrl . '?' . $params; 
-    header('Location: ' . $url); 
+    echo '<script>
+        window.location.href = window.location.href;
+    </script>';
+    exit();
 }
+
 
 function message_redirect($msg, $redirect)
 {
@@ -45,4 +43,18 @@ function save_file($directory, $new_name, $file_input_name)
 function generate_file_name($name, $file_input_name)
 {
     return $name . time() . "." . pathinfo($_FILES[$file_input_name]["name"], PATHINFO_EXTENSION);
+}
+
+
+//Save a file in the directory inserted using the new name
+
+function delete_file($file_path)
+{
+    if (file_exists($file_path)) {
+        echo "file EXITST";
+        return unlink($file_path);
+    } else {
+        echo "file DOES EXITST";
+        return false;
+    }
 }

@@ -34,7 +34,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         if ($new_order == 0) {
             message_redirect("Something went wrong  the value is zero", "edit_story.php?id=$id");
         }
-        if (!swapValues($pdo, $id, $current_order, $new_order)) {
+        if (!swapValues($pdo, $id, $current_order, $new_order, "video", "storyOrder", "storyId")) {
             message_redirect("Something went wrong when changing the order", "edit_story.php?id=$id");
         }
     } else if (isset($_POST['orderupVideo'])) {
@@ -45,16 +45,15 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $videoReorder = $video_change->fetch(PDO::FETCH_ASSOC);
         $current_order = $videoReorder['storyOrder'];
         $new_order = $current_order + 1;
-        if (!swapValues($pdo, $id, $current_order, $new_order)) {
+        if (!swapValues($pdo, $id, $current_order, $new_order, "video", "storyOrder", "storyId")) {
             message_redirect("Something went wrong when changing the order", "edit_story.php?id=$id");
         }
     } else if (isset($_POST['deleteVideo'])) {
         //Delete the video selected
         $video_id = $_POST['deleteVideo'];
-        $stmt = $pdo->prepare('SELECT id, storyId, storyOrder FROM video WHERE id = ?');
+        $stmt = $pdo->prepare('SELECT id, link, storyId, storyOrder, videoType FROM video WHERE id = ?');
         $stmt->execute([$video_id]);
         $video_change =  $stmt->fetch(PDO::FETCH_ASSOC);
-
         $sql = "DELETE FROM video WHERE id = ?";
         //Update the storyOrder of the videos after the one deleted to reflet the change
         $sql2 = "UPDATE video SET storyOrder = storyOrder - 1 WHERE storyOrder > ? and storyId = ?";
@@ -75,27 +74,83 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             $pdo->rollBack();
             message_redirect("Something went wrong when deleting the video", "edit_story.php?id=$id");
         }
+    } else if (isset($_POST['orderdownAudio'])) {
+        //Turn the order of the video selected down
+        $media_id = $_POST['orderdownAudio'];
+        $media_change = $pdo->prepare('SELECT id, storyOrder FROM audio WHERE id = ?');
+        $media_change->execute([$media_id]);
+        $media_reorder = $media_change->fetch(PDO::FETCH_ASSOC);
+        $current_order = $media_reorder['storyOrder'];
+        $new_order = $current_order - 1;
+        if ($new_order == 0) {
+            message_redirect("Something went wrong  the value is zero", "edit_story.php?id=$id");
+        }
+        if (!swapValues($pdo, $id, $current_order, $new_order, "audio", "storyOrder", "id_story")) {
+            message_redirect("Something went wrong when changing the order", "edit_story.php?id=$id");
+        }
+    } else if (isset($_POST['orderupAudio'])) {
+        //Turn the order of the video selected up
+        $media_id = $_POST['orderupAudio'];
+        $media_change = $pdo->prepare('SELECT id, storyOrder FROM audio WHERE id = ?');
+        $media_change->execute([$media_id]);
+        $media_reorder = $media_change->fetch(PDO::FETCH_ASSOC);
+        $current_order = $media_reorder['storyOrder'];
+        $new_order = $current_order + 1;
+        if (!swapValues($pdo, $id, $current_order, $new_order, "audio", "storyOrder", "id_story")) {
+            message_redirect("Something went wrong when changing the order", "edit_story.php?id=$id");
+        }
+    } else if (isset($_POST['deleteAudio'])) {
+        //Delete the video selected
+        $media_id = $_POST['deleteAudio'];
+        $stmt = $pdo->prepare('SELECT id, audio, id_story, storyOrder FROM audio WHERE id = ?');
+        $stmt->execute([$media_id]);
+        $media_alter =  $stmt->fetch(PDO::FETCH_ASSOC);
+
+        $sql = "DELETE FROM audio WHERE id = ?";
+        //Update the storyOrder of the videos after the one deleted to reflet the change
+        $sql2 = "UPDATE audio SET storyOrder = storyOrder - 1 WHERE storyOrder > ? and id_story = ?";
+
+        $alter_audio_file = $media_alter['audio'];
+        if (delete_file("./files/story_$id/audio/$alter_audio_file")) {
+            // start a transaction
+            $pdo->beginTransaction();
+            $stmt = $pdo->prepare($sql);
+            $stmt2 = $pdo->prepare($sql2);
+            if ($stmt->execute([$media_id]) && $stmt2->execute([$media_alter['storyOrder'], $media_alter['id_story']])) {
+                // commit the transaction
+                if (!$pdo->commit()) {
+                    message_redirect("Something went wrong when deleting the audio", "edit_story.php?id=$id");
+                }
+            } else {
+                //If a error occurs rollBack
+                $pdo->rollBack();
+                message_redirect("Something went wrong when deleting the audio", "edit_story.php?id=$id");
+            }
+        } else {
+            echo "Error Deleating ./files/story_$id/audio/$alter_audio_file";
+            // message_redirect("Something went wrong when deleting the audio file", "edit_story.php?id=$id");
+        }
     }
 }
 
 //Swap the values of the storyOrder
-function swapValues($pdo, $storyID, $value1, $value2)
+function swapValues($pdo, $storyID, $value1, $value2, $nameTable, $nameField1, $nameStoryId)
 {
 
     $new_order1 = -$value2;
     $new_order2 = -$value1;
 
     // Update the storyOrder to it's new values, but in negative, to avoid a unique key constraint violation.
-    $sql1 = "UPDATE video SET storyOrder = 
+    $sql1 = "UPDATE $nameTable SET $nameField1 = 
             CASE
-                WHEN storyOrder = :order1 THEN :new_order1
-                WHEN storyOrder = :order2 THEN :new_order2
+                WHEN $nameField1 = :order1 THEN :new_order1
+                WHEN $nameField1 = :order2 THEN :new_order2
             END 
-        WHERE storyOrder IN (" . $value1 . ", " . $value2 . ") AND storyID = :id";
+        WHERE $nameField1 IN (" . $value1 . ", " . $value2 . ") AND $nameStoryId = :id";
 
     //Set the values changed to positive
-    $sql2 = "UPDATE video SET storyOrder = -storyOrder 
-    WHERE storyOrder IN (:new_order1, :new_order2) AND storyID = :id";
+    $sql2 = "UPDATE $nameTable SET $nameField1 = -$nameField1 
+    WHERE $nameField1 IN (:new_order1, :new_order2) AND $nameStoryId = :id";
 
     // start a transaction
     $pdo->beginTransaction();
@@ -227,7 +282,7 @@ if ($audios_duration > $total_duration) {
             </div>
         </div>
         <div class="card mt-3">
-            <div class="card-header text-center">Edit Videos</div>
+            <div class="card-header text-center">Edit Media</div>
 
             <div class="preview-box">
                 <div class="w-100 mb-3">
@@ -245,7 +300,9 @@ if ($audios_duration > $total_duration) {
                     </div>
                     <form method="POST" action="edit_story.php?id=<?= $id; ?>">
                         <div class="video-scroller">
+
                             <div class="medias-wrapper">
+                                <p class="d-flex align-items-center justify-content-center rotated" style="color:white; margin: auto 1px;">Videos</p>
                                 <?php
                                 $time = 0;
                                 $numItems = count($videos);
@@ -253,7 +310,7 @@ if ($audios_duration > $total_duration) {
                                 foreach ($videos as $video) {
 
                                     echo "<div class='video-container' data-duration='" . $video["duration"] . "'>";
-                                    echo '<div class="container videoButtons p-0">
+                                    echo '<div class="container media-buttons p-0">
                                             <div class="row p-0 m-0">';
                                     if ($i != 0)
                                         echo    '<div class="col-sm p-0">
@@ -282,12 +339,28 @@ if ($audios_duration > $total_duration) {
                             <div class="mt-1 duration-line"></div>
 
                             <div class="medias-wrapper mt-3">
+                                <p class="d-flex align-items-center justify-content-center rotated" style="color:white; margin: auto 1px;">Audios</p>
                                 <?php
                                 $time = 0;
                                 $numItems = count($audios);
                                 $i = 0;
                                 foreach ($audios as $audio) {
-                                    echo "<div class='audio-container mt-2' data-duration='" . $audio["duration"] . "'>";
+                                    echo "<div class='audio-container' data-duration='" . $audio["duration"] . "'>";
+                                    echo '<div class="container media-buttons p-0">
+                                            <div class="row p-0 m-0">';
+                                    if ($i != 0)
+                                        echo    '<div class="col-sm p-0">
+                                                    <button type="submit" name="orderdownAudio" value="' . $audio["id"] . '" class="w-100 btn-primary"><</button>
+                                                </div>';
+                                    echo        '<div class="col-sm  p-0">
+                                                    <button type="submit" onclick="confirmDelete()" id="deleteAudio" name="deleteAudio" value="' . $audio["id"] . '" class="w-100  btn-danger">X</button>
+                                                </div>';
+                                    if ($i < $numItems - 1)
+                                        echo    '<div class="col-sm  p-0">
+                                                    <button type="submit" name="orderupAudio" value="' . $audio["id"] . '" class="w-100 btn-primary">></button> 
+                                                </div>';
+                                    echo    '</div>
+                                        </div>';
                                     echo '<audio class="w-100" controls src="./files/story_' . $audio["id_story"] . '/audio/' . $audio["audio"] . '"></audio>';
                                     echo '<span class="duration"></span>';
                                     echo "</div>";
