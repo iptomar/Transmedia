@@ -50,6 +50,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['add_audio'])) {
             SELECT ?,?,?,coalesce(MAX(storyOrder),0)+ 1 FROM audio WHERE id_story = ?;";
             $stmt = $pdo->prepare($sql);
             $stmt->execute([$storyId, $audio, $duration, $storyId]);
+            reload_page();
         } catch (Exception $e) {
             echo '<script>alert("ERROR occured while connecting to the database")</script>';
         }

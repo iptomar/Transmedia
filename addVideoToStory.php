@@ -6,6 +6,7 @@ include_once "./functions/useful.php";
 //If id of story is not set
 if (!isset($_GET['id']) || $_GET['id'] == null) {
     message_redirect("ERROR: Something went wrong", "my_stories.php");
+    exit();
 }
 $stmt = $pdo->prepare('SELECT id,name, author FROM story where author=?');
 $stmt->execute([$_SESSION['user']]);
@@ -24,9 +25,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['add_video'])) {
     }
     //Get story id
     $storyId = $_POST['id'];
-    //Link to redirect back to page, with options selected, after error occurs
-    $redirect = basename(__FILE__) . "?id=$storyId";
-
 
     $valid = true;
     //Verify if story belongs to the user
@@ -37,8 +35,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['add_video'])) {
     }
 
     //Get video duration from hidden input
-    if (isset($_POST["duration"]) && $_POST["duration"] > 0) {
-        $duration =  $_POST["duration"];
+    if (isset($_POST["durationVideo"]) && $_POST["durationVideo"] > 0) {
+        $duration =  $_POST["durationVideo"];
     } else {
         //If the duration is not set show error message
         alert("ERROR occurred when getting the duration");
@@ -128,15 +126,13 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['add_video'])) {
                         </div>
                         <input type="hidden" id="storyId" name="id" value="<?= isset($_GET['id']) ?  $_GET['id'] : "" ?>" />
                     </div>
-                    <input type="hidden" id="storySelect" name="id" value=<?= isset($_GET['id']) ?  $_GET['id'] : "" ?> />
-
                     <div id="previewAdd"></div>
 
                     <div class="mb-3">
                         <label for="chooseVideo" class="form-label">Choose Video:</label>
                         <input id="chooseVideo" class="form-control" required name="chooseVideo">
                     </div>
-                    <input type="hidden" id="duration" name="duration" />
+                    <input type="hidden" id="durationVideo" name="durationVideo" />
 
                     <input type="submit" name="add_video" class="w-100 btn btn-primary" style="margin-top: 10px">
 
@@ -194,7 +190,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['add_video'])) {
 
         //When the youtube player is ready the API calls this function
         function onPlayerReady(event) {
-            document.getElementById("duration").setAttribute('value', player.getDuration());
+            document.getElementById("durationVideo").setAttribute('value', player.getDuration());
         }
 
 
@@ -207,7 +203,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['add_video'])) {
             if (fileTypeSelected == "file") {
                 console.log(fileType)
                 $("#previewAdd").html('')
-                document.getElementById("duration").setAttribute('value', "");
+                document.getElementById("durationVideo").setAttribute('value', "");
                 var fileType = this.files[0]["type"];
                 if (fileType.split('/')[0] === 'video') {
                     input.setCustomValidity("");
@@ -220,7 +216,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['add_video'])) {
                     var videoPlayer = document.getElementById("videofile")
                     //Add the duration to the hidden input
                     videoPlayer.addEventListener('durationchange', function() {
-                        document.getElementById("duration").setAttribute('value', videoPlayer.duration);
+                        document.getElementById("durationVideo").setAttribute('value', videoPlayer.duration);
                     });
 
                     //Scroll to the bottom of the page, in order to keep the button visible

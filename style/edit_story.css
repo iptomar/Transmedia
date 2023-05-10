@@ -3,6 +3,11 @@
     margin: auto;
 }
 
+.preview-box{
+
+    border: 1px solid rgba(0,0,0,.125);
+}
+
 .video-scroller {
     overflow-x: scroll;
     overflow-y: visible;
@@ -10,7 +15,7 @@
     width: 100%;
 }
 
-.videos-wrapper {
+.medias-wrapper {
     border: 1px;
     display: flex;
     gap: 1px;
@@ -22,7 +27,8 @@
     display: inline-block;
 }
 
-.video-container {
+.video-container, 
+.audio-container {
     position: relative;
     box-sizing: border-box;
     border: 1px solid black;
@@ -32,6 +38,8 @@
     min-width: 100px;
     margin: 0;
 }
+
+
 
 
 
@@ -49,7 +57,12 @@
     height: 150px;
 }
 
-.video-container .duration {
+.audio-container audio{
+    z-index: 0;
+    pointer-events: none;
+}
+
+.duration {
     position: absolute;
     bottom: -28px;
     left: 0;

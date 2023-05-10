@@ -142,10 +142,24 @@ $sql_videos = $pdo->prepare('SELECT id, link, storyId, videoType, storyOrder,dur
 $sql_videos->execute([$_GET['id']]);
 $videos = $sql_videos->fetchAll(PDO::FETCH_ASSOC);
 
+// Fetch the story videos
+$sql_audios = $pdo->prepare('SELECT id, id_story, audio, storyOrder,duration FROM audio WHERE id_story = ? ORDER BY storyOrder;');
+$sql_audios->execute([$_GET['id']]);
+$audios = $sql_audios->fetchAll(PDO::FETCH_ASSOC);
+
 // Calculate total duration of all videos
 $total_duration = 0;
 foreach ($videos as $video) {
     $total_duration += $video['duration'];
+}
+$audios_duration = 0;
+foreach ($audios as $audio) {
+    $audios_duration += $audio['duration'];
+}
+
+//Use the larger duration as the total duration
+if ($audios_duration > $total_duration) {
+    $total_duration = $audios_duration;
 }
 ?>
 <!DOCTYPE html>
@@ -214,18 +228,24 @@ foreach ($videos as $video) {
         </div>
         <div class="card mt-3">
             <div class="card-header text-center">Edit Videos</div>
+
+            <div class="preview-box">
+                <div class="w-100 mb-3">
+                    <div id="preview"></div>
+                </div>
+            </div>
+
             <div class="card-body">
-
                 <div class="form-group mb-3">
-                    <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#addVideo">Add Video</button>
-                    <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#addAudio">Add Audio</button>
 
-                    <div class="w-100 mb-3">
-                        <div id="preview"></div>
+                    <div class="form-group mb-3">
+
+                        <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#addVideo">Add Video</button>
+                        <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#addAudio">Add Audio</button>
                     </div>
                     <form method="POST" action="edit_story.php?id=<?= $id; ?>">
                         <div class="video-scroller">
-                            <div class="videos-wrapper">
+                            <div class="medias-wrapper">
                                 <?php
                                 $time = 0;
                                 $numItems = count($videos);
@@ -260,12 +280,29 @@ foreach ($videos as $video) {
                                 } ?>
                             </div>
                             <div class="mt-1 duration-line"></div>
-                        </div>
-                    </form>
 
+                            <div class="medias-wrapper mt-3">
+                                <?php
+                                $time = 0;
+                                $numItems = count($audios);
+                                $i = 0;
+                                foreach ($audios as $audio) {
+                                    echo "<div class='audio-container mt-2' data-duration='" . $audio["duration"] . "'>";
+                                    echo '<audio class="w-100" controls src="./files/story_' . $audio["id_story"] . '/audio/' . $audio["audio"] . '"></audio>';
+                                    echo '<span class="duration"></span>';
+                                    echo "</div>";
+                                    $i++;
+                                } ?>
+                            </div>
+                            <div class="mt-1 duration-line"></div>
+
+                        </div>
                 </div>
+                </form>
+
             </div>
         </div>
+    </div>
 
 
     </div>
@@ -282,6 +319,7 @@ foreach ($videos as $video) {
             }
         }
         var videos = [];
+        var audios = [];
         const totalDuration = <?= $total_duration ?>;
         var time = 0;
 
@@ -377,6 +415,25 @@ foreach ($videos as $video) {
             preview.appendChild(clonedVideo);
             preview.classList.add('embed-responsive', 'embed-responsive-16by9');
         }
+
+        function previewAudio(nextAudio) {
+            const clonedAudio = nextAudio.cloneNode(true);
+            if (clonedAudio.tagName === 'AUDIO') {
+                // Handle HTML5 video
+                clonedAudio.addEventListener("ended", function() {
+                    previewAudio(audios[audios.length - 1]);
+                });
+                clonedAudio.setAttribute('autoplay', 'true'); // set autoplay attribute to start playing the audio
+                clonedAudio.setAttribute('controls', 'true'); // set controls attribute to display the audio controls
+                clonedAudio.play();
+            }
+            const preview = document.querySelector('#preview');
+            //Add the Video to the preview div
+            preview.innerHTML = '';
+            preview.appendChild(clonedAudio);
+            preview.className = 'w-100 mt-3';
+        }
+
         // The Youtube Frame API will call this function when the video player is ready.
         function onPreviewReady(event) {
             event.target.playVideo();
@@ -400,7 +457,8 @@ foreach ($videos as $video) {
 
 
         function setVideoContainer() {
-            const containers = document.querySelectorAll('.videos-wrapper .video-container');
+            time = 0;
+            const containers = document.querySelectorAll('.medias-wrapper .video-container');
             containers.forEach(container => {
                 //Add the video element to the videos array
                 const videoElement = container.querySelector('iframe, video');
@@ -409,7 +467,7 @@ foreach ($videos as $video) {
                 videos.push(videoElement);
 
                 if (totalDuration > 3600) {
-                    const wrapper = document.querySelector('.videos-wrapper');
+                    const wrapper = document.querySelector('.medias-wrapper');
                     const percentageWrapper = (~~(totalDuration / 3600) * 10) + 100;
                     const line = document.querySelector('.duration-line');
                     line.style.width = `${percentageWrapper}%`;
@@ -434,6 +492,47 @@ foreach ($videos as $video) {
                     } else {
                         const iframeOrVideo = container.querySelector('iframe, video');
                         previewVideo(iframeOrVideo)
+                    }
+
+                });
+
+
+            });
+
+            setAudioContainer();
+        }
+
+        function setAudioContainer() {
+            time = 0;
+            console.log("SET AUDIO")
+            const containers = document.querySelectorAll('.medias-wrapper .audio-container');
+            containers.forEach(container => {
+                console.log("CONTAINERS")
+                //Add the video element to the videos array
+                const audioElement = container.querySelector('audio');
+                //Set the id of the video with the format video_<index in the videos array>
+                audioElement.setAttribute('id', 'audio_' + (audios.length));
+                audios.push(audioElement);
+
+                //Set the video width depending on it's length
+                const duration = parseInt(container.dataset.duration);
+                const percentage = (duration / totalDuration) * 100;
+                container.style.width = `${percentage}%`;
+
+                //Add to the time of the story the current video time
+                time += duration;
+                const durationElement = container.querySelector('.duration');
+                console.log(durationElement)
+                //Format the time of the video
+                durationElement.textContent = timeFormat(time);
+
+                container.addEventListener('click', (e) => {
+                    //Don't trigger if button is pressed
+                    if ($(e.target).is("button")) {
+                        return;
+                    } else {
+                        const audio = container.querySelector('audio');
+                        previewAudio(audio);
                     }
 
                 });
