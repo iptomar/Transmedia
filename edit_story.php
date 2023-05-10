@@ -58,21 +58,36 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         //Update the storyOrder of the videos after the one deleted to reflet the change
         $sql2 = "UPDATE video SET storyOrder = storyOrder - 1 WHERE storyOrder > ? and storyId = ?";
 
-        // start a transaction
-        $pdo->beginTransaction();
-
-        $stmt = $pdo->prepare($sql);
-        $stmt2 = $pdo->prepare($sql2);
-
-        if ($stmt->execute([$video_id]) && $stmt2->execute([$video_change['storyOrder'], $video_change['storyId']])) {
-            // commit the transaction
-            if (!$pdo->commit()) {
+        $alter_video_file = $video_change['link'];
+        $storyId = $video_change['storyId'];
+        $continue = true;
+        if ($video_change['videoType'] == 'file' && delete_file("./files/story_$storyId/video/$alter_video_file")) {
+            $continue = true;
+        } else if ($video_change['videoType'] == 'text') {
+            $continue = true;
+        } else {
+            $continue = false;
+        }
+        //If video was successfully deleted, in case it's a video Type file, or if it's a valid videoType
+        if ($continue) {
+            // start a transaction
+            $pdo->beginTransaction();
+            //Run the command to delete the video from the DB
+            $stmt = $pdo->prepare($sql);
+            //Run the command to update the videos that had higher storyOrder values
+            $stmt2 = $pdo->prepare($sql2);
+            if ($stmt->execute([$video_id]) && $stmt2->execute([$video_change['storyOrder'], $video_change['storyId']])) {
+                // commit the transaction
+                if (!$pdo->commit()) {
+                    message_redirect("Something went wrong when deleting the video", "edit_story.php?id=$id");
+                }
+            } else {
+                //If a error occurs rollBack
+                $pdo->rollBack();
                 message_redirect("Something went wrong when deleting the video", "edit_story.php?id=$id");
             }
         } else {
-            //If a error occurs rollBack
-            $pdo->rollBack();
-            message_redirect("Something went wrong when deleting the video", "edit_story.php?id=$id");
+            message_redirect("Something went wrong when deleting the audio file", "edit_story.php?id=$id");
         }
     } else if (isset($_POST['orderdownAudio'])) {
         //Turn the order of the video selected down
