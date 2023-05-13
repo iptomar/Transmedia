@@ -28,6 +28,7 @@ $stories = $stmt->fetchAll(PDO::FETCH_DEFAULT);
             <?php foreach ($stories as $story) : ?>
                 <div class="col-12 col-sm-6 col-md-4 col-lg-3 mb-3">
                     <div class="story_container text-center">
+                        <a class="btn btn-primary w-100" href="edit_story.php?id=<?= $story['id'] ?>">Edit</a>
                         <a class="text-reset text-decoration-none w-100" href="selectedStoryPage.php?id=<?= $story['id'] ?>">
                             <img src="100x100_logo.png" class="img-fluid img-thumbnail w-100" />
                             <p class="w-100 p-1 pl-2 pr-2">
