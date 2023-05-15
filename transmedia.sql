@@ -145,19 +145,7 @@ CREATE TABLE `audio` (
   `audio` varchar(255) DEFAULT NULL,
   `duration` int(11) NOT NULL,
   `storyOrder` int(11) NOT NULL
-) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4;
-
--- Insert data to the table
-INSERT INTO
-  `audio` (`id`, `id_story`, `audio`, `author`)
-VALUES
-  (1, 232, 'audio_1683714672.mp3', 'joana'),
-  (2, 232, 'audio_1683714865.mp3', 'joana'),
-  (3, 232, 'audio_1683714875.mp3', 'joana'),
-  (4, 232, 'audio_1683714886.mp3', 'joana'),
-  (5, 232, 'audio_1683714893.mp3', 'joana'),
-  (6, 232, 'audio_1683714984.mp3', 'joana'),
-  (7, 232, 'audio_1683714997.mp3', 'joana');
+) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4; 
 
 -- Add foreign key
 ALTER TABLE
@@ -178,4 +166,11 @@ MODIFY
   UNIQUE KEY `storyOrder` (`id_story`, `storyOrder`);
 
 INSERT INTO `audio` (`id`, `id_story`, `audio`, `duration`, `storyOrder`) VALUES
-(1, 228, 'audio_1683677229.mp3', 107, 1);
+(1, 228, 'audio_1683677229.mp3', 107, 1),
+(2, 232, 'audio_1683714672.mp3', 68, 2),
+(3, 232, 'audio_1683714865.mp3', 151, 8),
+(4, 232, 'audio_1683714875.mp3', 1, 4),
+(5, 232, 'audio_1683714886.mp3', 1, 3),
+(6, 232, 'audio_1683714893.mp3', 1, 5),
+(7, 232, 'audio_1683714984.mp3', 2, 7),
+(8, 232, 'audio_1683714997.mp3', 2, 6);
