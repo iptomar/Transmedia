@@ -138,7 +138,6 @@ foreach ($videoFetch as $video) {
             </div>
 
         </div>
-
     </div>
 </body>
 

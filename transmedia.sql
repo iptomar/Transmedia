@@ -174,3 +174,26 @@ INSERT INTO `audio` (`id`, `id_story`, `audio`, `duration`, `storyOrder`) VALUES
 (6, 232, 'audio_1683714893.mp3', 1, 5),
 (7, 232, 'audio_1683714984.mp3', 2, 7),
 (8, 232, 'audio_1683714997.mp3', 2, 6);
+
+
+-- Alter the table to add ON DELETE CASCADE to foreign key constraint
+ALTER TABLE `story`
+DROP FOREIGN KEY `story_ibfk_1`;
+
+ALTER TABLE `story`
+ADD FOREIGN KEY (`author`) REFERENCES `user` (`username`) ON DELETE CASCADE;
+
+-- Alter the table to add ON DELETE CASCADE to foreign key constraint
+ALTER TABLE `video`
+DROP FOREIGN KEY `video_ibfk_1`;
+
+ALTER TABLE `video`
+ADD CONSTRAINT `video_ibfk_1` FOREIGN KEY (`storyId`) REFERENCES `story` (`id`) ON DELETE CASCADE;
+
+
+-- Alter the table to add ON DELETE CASCADE to foreign key constraint
+ALTER TABLE `audio`
+DROP FOREIGN KEY `audio_ibfk_1`;
+
+ALTER TABLE `audio`
+ADD CONSTRAINT `audio_ibfk_1` FOREIGN KEY (`id_story`) REFERENCES `story` (`id`) ON DELETE CASCADE;
