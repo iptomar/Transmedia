@@ -2,7 +2,7 @@
 require "config/connectdb.php";
 include "./functions/useful.php";
 
-$story = $pdo->prepare('SELECT story.name,story.description,story.author FROM story WHERE story.id = ?');
+$story = $pdo->prepare('SELECT story.name,story.description,story.author, story.id FROM story WHERE story.id = ?');
 $video = $pdo->prepare('SELECT video.link,video.storyId,video.videoType,video.storyOrder,video.duration FROM video WHERE video.storyId = ? ORDER BY video.storyOrder');
 $audio = $pdo->prepare('SELECT audio.id,audio.id_story,audio.audio,audio.storyOrder FROM audio WHERE audio.id_story = ? ORDER BY audio.storyOrder');
 $story->execute([$_GET['id']]);
@@ -36,103 +36,110 @@ foreach ($videoFetch as $video) {
         <?php
         include "NavBar.php";
         ?>
-        <div class="Name">
-            <label for="name" style="font-size:20px; font-weight: bold;">Name</label>
-            <p>
-                <?php
-                print($storyFetch['name'])
-                ?>
-            </p>
-        </div>
+        <div class="container card mt-5">
+            <div class="card-body text-center">
+                <div class="Name">
+                    <label for="name" style="font-size:20px; font-weight: bold;">Name</label>
+                    <p>
+                        <?php
+                        print($storyFetch['name'])
+                        ?>
+                    </p>
+                </div>
 
-        <div class="description">
-            <label for="description" style="font-size:20px; font-weight: bold;">Description</label>
-            <p>
-                <?php
-                if ($storyFetch['description'] == null) {
-                    print("no description");
-                } else {
-                    print($storyFetch['description']);
-                }
-                ?>
-            </p>
-        </div>
-
-        <div class="author">
-            <label for="author" style="font-size:20px; font-weight: bold;">Author</label>
-            <p>
-                <?php
-                print($storyFetch['author'])
-                ?>
-            </p>
-        </div>
-
-        <div class="change-media">
-
-            <form method="post" onsubmit="onSwitch()">
-                <?php
-
-                if (isset($videoFetch) && !empty($videoFetch)) {
-                    echo '<input class="bg-primary text-white media-button rounded border-0 m-2 p-2" type="submit" name="mediaOpt" value="video"/>';
-                }
-                if (isset($audioFetch) && !empty($audioFetch)) {
-                    echo '<input class="bg-primary text-white media-button rounded border-0 m-2 p-2" type="submit" name="mediaOpt" value="audio"/>';
-                }
-                if (isset($imagesFetch) && !empty($imagesFetch)) {
-                    echo '<input class="bg-primary text-white media-button rounded border-0 m-2 p-2" type="submit" name="mediaOpt" value="images"/>';
-                }
-                if (isset($textFetch) && !empty($textFetch)) {
-                    echo '<input class="bg-primary text-white media-button rounded border-0 m-2 p-2" type="submit" name="mediaOpt" value="text"/>';
-                }
-
-                ?>
-
-
-            </form>
-
-        </div>
-
-        <div id="mediaDiv">
-            <?php
-            //tratamento variavel sessao de opcao de meio
-            if (isset($_POST["mediaOpt"])) {
-                $_SESSION["mediaOpt"] = $_POST["mediaOpt"];
-            } else {
-                $_SESSION["mediaOpt"] = "video";
-            }
-
-            $mediaOpt = $_SESSION["mediaOpt"];
-            switch ($mediaOpt) {
-
-                case "video":
-
-                    for ($i = 0; $i < count($videoFetch); $i++) {
-                        echo '<div id="preview' . $i . '" class="video-preview embed-responsive col-md-4 offset-md-1 d-inline-block rounded" style="width:320px; height:180px";>';
-                        if ($videoFetch[$i]["videoType"] == "file") {
-                            echo '<video id="player' . $i . '" onplay="queueManager(this)" class ="player video-class embed-responsive-item" controls src="./files/story_' . $videoFetch[$i]["storyId"] . '/video/' . $videoFetch[$i]["link"] . '"></video>';
-                        } elseif ($videoFetch[$i]["videoType"] == "text") {
-                            echo '<iframe id="player' . $i . '" class ="player video-class embed-responsive-item" type="text/html" src="https://www.youtube.com/embed/' . $videoFetch[$i]["link"] . '?enablejsapi=1" allowfullscreen="true" allowscriptaccess="always"></iframe>'; //add iframe with src pointing to the video with this code
+                <div class="description">
+                    <label for="description" style="font-size:20px; font-weight: bold;">Description</label>
+                    <p>
+                        <?php
+                        if ($storyFetch['description'] == null) {
+                            print("no description");
+                        } else {
+                            print($storyFetch['description']);
                         }
-                        echo '</div>';
+                        ?>
+                    </p>
+                </div>
+
+                <div class="author">
+                    <label for="author" style="font-size:20px; font-weight: bold;">Author</label>
+                    <p>
+                        <?php
+                        print($storyFetch['author'])
+                        ?>
+                    </p>
+                </div>
+
+                <div class="change-media">
+
+                    <form method="post" onsubmit="onSwitch()">
+                        <?php
+
+                        if (isset($videoFetch) && !empty($videoFetch)) {
+                            echo '<input class="bg-primary text-white media-button rounded border-0 m-2 p-2" type="submit" name="mediaOpt" value="video"/>';
+                        }
+                        if (isset($audioFetch) && !empty($audioFetch)) {
+                            echo '<input class="bg-primary text-white media-button rounded border-0 m-2 p-2" type="submit" name="mediaOpt" value="audio"/>';
+                        }
+                        if (isset($imagesFetch) && !empty($imagesFetch)) {
+                            echo '<input class="bg-primary text-white media-button rounded border-0 m-2 p-2" type="submit" name="mediaOpt" value="images"/>';
+                        }
+                        if (isset($textFetch) && !empty($textFetch)) {
+                            echo '<input class="bg-primary text-white media-button rounded border-0 m-2 p-2" type="submit" name="mediaOpt" value="text"/>';
+                        }
+
+                        ?>
+
+
+                    </form>
+
+                </div>
+
+                <div id="mediaDiv" class="mt-3">
+                    <?php
+                    //tratamento variavel sessao de opcao de meio
+                    if (isset($_POST["mediaOpt"])) {
+                        $_SESSION["mediaOpt"] = $_POST["mediaOpt"];
+                    } else {
+                        $_SESSION["mediaOpt"] = "video";
                     }
-                    break;
 
-                case "audio":
+                    $mediaOpt = $_SESSION["mediaOpt"];
+                    switch ($mediaOpt) {
 
-                    for ($i = 0; $i < count($audioFetch); $i++) {
-                        echo '<audio class="player audio-class" onplay="audioQueueManager(this)" controls id="audio-player-' . $i . '" src="./files/story_' . $audioFetch[$i]["id_story"] . '/audio/' . $audioFetch[$i]["audio"] . '"></audio>';
+                        case "video":
+
+                            for ($i = 0; $i < count($videoFetch); $i++) {
+                                echo '<div id="preview' . $i . '" class="video-preview embed-responsive col-4 m-4 d-inline-block rounded" style="width:320px; height:180px";>';
+                                if ($videoFetch[$i]["videoType"] == "file") {
+                                    echo '<video id="player' . $i . '" onplay="queueManager(this)" onended="getAndPlayNextPlayer(this)" class =" video-audio player video-class embed-responsive-item" controls src="./files/story_' . $videoFetch[$i]["storyId"] . '/video/' . $videoFetch[$i]["link"] . '"></video>';
+                                } elseif ($videoFetch[$i]["videoType"] == "text") {
+                                    echo '<iframe id="player' . $i . '" class ="player video-class embed-responsive-item" type="text/html" src="https://www.youtube.com/embed/' . $videoFetch[$i]["link"] . '?enablejsapi=1" allowfullscreen="true" allow="autoplay" allowscriptaccess="always"></iframe>'; //add iframe with src pointing to the video with this code
+                                }
+                                echo '</div>';
+                            }
+                            break;
+
+                        case "audio":
+
+                            for ($i = 0; $i < count($audioFetch); $i++) {
+                                echo '<audio class=" video-audio player audio-class" onplay="queueManager(this)" onended="getAndPlayNextPlayer(this)" controls id="audio-player-' . $i . '" src="./files/story_' . $audioFetch[$i]["id_story"] . '/audio/' . $audioFetch[$i]["audio"] . '"></audio>';
+                            }
+                            break;
+                        case "images":
+                            echo "Yet To Be Implemented";
+                            break;
+                        case "text":
+                            echo "Yet To Be Implemented";
+                            break;
                     }
-                    break;
-                case "images":
-                    echo "Yet To Be Implemented";
-                    break;
-                case "text":
-                    echo "Yet To Be Implemented";
-                    break;
-            }
 
-            ?>
+                    ?>
+                </div>
+            </div>
+
         </div>
+
+    </div>
 </body>
 
 <script>
@@ -148,6 +155,9 @@ foreach ($videoFetch as $video) {
     //array with all the video players
     var allVideoPlayers = document.getElementsByClassName("video-class");
 
+    //all players that are not an <iframe>
+    var allPlayersNoIframe = document.getElementsByClassName("video-audio");
+
     //array with all the audio players
     var allAudioPlayers = document.getElementsByClassName("audio-class");
 
@@ -160,8 +170,15 @@ foreach ($videoFetch as $video) {
     //function to be called on <body> load
     function inic() {
 
+        if (sessionStorage.getItem("storyId") != <?= $storyFetch['id'] ?>) {
+            sessionStorage.setItem("totalStoryElapsedTime", 0);
+            sessionStorage.setItem("storyId", <?= $storyFetch['id'] ?>)
+        }
+
         console.log(sessionStorage.getItem("totalStoryElapsedTime"));
 
+        //wait time in milliseconds
+        var waitTimeMillis = allPlayers.length * 200;
 
         //variable to count the players with tag = "IFRAME"
         let count = -1;
@@ -173,11 +190,14 @@ foreach ($videoFetch as $video) {
                 count++;
                 //call the method to prepare the YouTube API for this element
                 onYouTubeIframeAPIReady("player" + i, count);
+
             }
         }
-
-        playWithElapsedTime();
+        playWithElapsedTime(waitTimeMillis);
     }
+
+    const sleep = (ms) =>
+        new Promise(resolve => setTimeout(resolve, ms));
 
     //function that retrieves the actual elapsed story time
     function getTotalElapsedStoryTime() {
@@ -190,11 +210,11 @@ foreach ($videoFetch as $video) {
         //actions to take if the actual player is
         //of a tag=<video> video or tag=<audio>
         if (actualPlayer.tagName == "VIDEO" || actualPlayer.tagName == "AUDIO") {
-            //get the story order of the actual video
+            //get the story order of the actual video or audio
             var actualPlayerIndex = Array.prototype.slice.call(allPlayers).indexOf(actualPlayer);
             cumulativeTime += getPlayerCurrentTime(actualPlayer);
         } else {
-            //get the story order of the actual video
+            //get the story order of the actual YouTube video
             var actualPlayerIndex = Array.prototype.slice.call(allPlayers).indexOf(actualPlayer.g);
             cumulativeTime += getYTPlayerCurrentTime(actualPlayer);
         }
@@ -231,7 +251,8 @@ foreach ($videoFetch as $video) {
 
     //function to play the current player
     //acording to the elapsed story time
-    function playWithElapsedTime() {
+    async function playWithElapsedTime(waitTimeMillis) {
+        await sleep(waitTimeMillis);
         //store total elapsed time in variable
         //(this variable is to later store The
         //current time of the current player)
@@ -243,34 +264,66 @@ foreach ($videoFetch as $video) {
         //variable to store YouTube player
         var ytPlayer;
 
+        //varible to store iframe
+        var iframe;
+
         for (i = 0; i < allPlayers.length; i++) {
             if (allPlayers[i].tagName == "VIDEO" || allPlayers[i].tagName == "AUDIO") {
-                actualPlayerTime -= getPlayerDuration(allPlayers[i]);
                 if (getPlayerDuration(allPlayers[i]) > actualPlayerTime) {
                     actualPlayer = allPlayers[i];
                     break;
                 }
+                actualPlayerTime -= getPlayerDuration(allPlayers[i]);
+
             } else if (allPlayers[i].tagName == "IFRAME") {
                 for (j = 0; j < player.length; j++) {
                     if (player[j].g == allPlayers[i]) {
                         ytPlayer = player[j];
+                        iframe = allPlayers[i];
                         break;
                     }
                 }
-                actualPlayerTime -= getYTPlayerDuration(ytPlayer);
                 if (getYTPlayerDuration(ytPlayer) > actualPlayerTime) {
                     actualPlayer = ytPlayer;
                     break;
                 }
+                actualPlayerTime -= getYTPlayerDuration(ytPlayer);
             }
         }
 
-        if (actualPlayer.tagName == "VIDEO" || actualPlayer.tagName == "AUDIO"){
+        if (actualPlayer.tagName == "VIDEO" || actualPlayer.tagName == "AUDIO") {
             actualPlayer.currentTime = actualPlayerTime;
             actualPlayer.play();
-        }else{
-            actualPlayer.seekTo(actualPlayerTime, false);
-            actualPlayer.playVideo();
+        } else {
+            actualPlayer.loadVideoByUrl(iframe.getAttribute("src"), actualPlayerTime, 'large');
+        }
+    }
+
+    function getAndPlayNextPlayer(Player) {
+        if (Player.tagName == "VIDEO" || Player.tagName == "AUDIO") {
+            //get the story order of the actual video or audio
+            var nextPlayerIndex = Array.prototype.slice.call(allPlayers).indexOf(Player) + 1;
+
+        } else {
+            //get the story order of the actual YouTube video
+            var nextPlayerIndex = Array.prototype.slice.call(allPlayers).indexOf(Player.g) + 1;
+        }
+
+        //verify if there are more players
+        if (nextPlayerIndex == allPlayers.length) {
+            nextPlayerIndex = 0;
+        }
+
+        if (allPlayers[nextPlayerIndex].tagName == "VIDEO" || allPlayers[nextPlayerIndex].tagName == "AUDIO") {
+            allPlayers[nextPlayerIndex].play();
+        } else {
+            //get YouTube player to play it
+            for (j = 0; j < player.length; j++) {
+                if (player[j].g == allPlayers[nextPlayerIndex]) {
+                    player[j].playVideo();
+                    break;
+                }
+            }
         }
     }
 
@@ -285,48 +338,26 @@ foreach ($videoFetch as $video) {
     }
 
     //function to manage the queue for video media type
-    function queueManager(videoPlayer) {
+    function queueManager(Player) {
         //only push into queue when the video player
         //doesn't exist alerady in the queue
-        if (!queue.includes(videoPlayer)) {
-            queue.push(videoPlayer);
+        if (!queue.includes(Player)) {
+            queue.push(Player);
         }
 
         //if there is more than one video playing
         if (queue.length > 1) {
             //retrieve last video
-            lastVideo = queue.shift();
+            lastPlay = queue.shift();
             //actions to take to stop
-            //if lastVideo has tag name "VIDEO"
-            if (lastVideo.tagName == "VIDEO") {
-                //console.log(lastVideo)
-                lastVideo.pause();
-                lastVideo.currentTime = 0;
+            //if lastPlay has tag name "VIDEO"
+            if (lastPlay.tagName == "VIDEO" || lastPlay.tagName == "AUDIO") {
+                //console.log(lastPlay)
+                lastPlay.pause();
+                lastPlay.currentTime = 0;
             } else {
-                //console.log(lastVideo)
-                lastVideo.stopVideo();
-            }
-        }
-        getTotalElapsedStoryTime();
-    }
-
-    //function to manage the queue for audio media type
-    function audioQueueManager(audioPlayer) {
-        if (!queue.includes(audioPlayer)) {
-            queue.push(audioPlayer);
-        }
-
-        //if there is more than one audio playing
-        if (queue.length > 1) {
-            //retrieve last audio
-            lastAudio = queue.shift();
-            //actions to take to stop
-            //if lastVideo has tag name "AUDIO"
-            if (lastAudio.tagName == "AUDIO") {
-                lastAudio.pause();
-                lastAudio.currentTime = 0;
-            } else {
-                //yet to be implemented
+                //console.log(lastPlay)
+                lastPlay.stopVideo();
             }
         }
         getTotalElapsedStoryTime();
@@ -366,6 +397,8 @@ foreach ($videoFetch as $video) {
     function onPlayerStateChange(event) {
         if (event.target.getPlayerState() == YT.PlayerState.PLAYING) {
             queueManager(event.target);
+        } else if (event.target.getPlayerState() == YT.PlayerState.ENDED) {
+            getAndPlayNextPlayer(event.target);
         }
     }
 
