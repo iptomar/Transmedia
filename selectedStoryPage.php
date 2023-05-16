@@ -27,7 +27,8 @@ $audioFetch = $audio->fetchAll(PDO::FETCH_ASSOC);
     <?php
     include "NavBar.php";
     if ($storyFetch['author'] == $_SESSION['user']) {
-        echo"<a class='btn btn-primary mt-2 mt-2' href='edit_story.php?id=".$_GET['id']."'>Edit Story</a>";
+        echo "<a class='btn btn-primary mt-2' href='edit_story.php?id=" . $_GET['id'] . "'>Edit Story</a>";
+        echo "<a onclick='confirmDelete()' class='btn btn-danger mt-2 ml-2' href='delete_story.php?id=" . $_GET['id'] . "'>Delete Story</a>";
     }
     ?>
     <div class="Name">
@@ -76,6 +77,16 @@ $audioFetch = $audio->fetchAll(PDO::FETCH_ASSOC);
                 echo '<audio controls src="./files/story_'. $audio["id_story"]. '/audio/' . $audio["audio"] . '"></audio>';
         }
         ?>
+    </div>
+    <script>
+        // Function prompts the user to confirm the delete before submitting the form
+        function confirmDelete() {
+            const confirmed = confirm('Are you sure you want to delete this?');
+            if (!confirmed) {
+                event.preventDefault(); // prevent the form from submitting if the user doesn't confirm
+            }
+        }
+    </script>
 </body>
 
 </html>
