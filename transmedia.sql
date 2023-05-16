@@ -94,7 +94,8 @@ VALUES
   (228, 'Benfica', '', 'tiago'),
   (229, 'Porto', '', 'joana'),
   (230, 'Desporto', '', 'tiago'),
-  (231, 'teste', 'lorem ipsum', 'joana');
+  (231, 'teste', 'lorem ipsum', 'joana'),
+  (232, 'teste3', 'lorem', 'joana');
 
 -- --------------------------------------------------------
 -- Structure of table `video`
@@ -134,7 +135,8 @@ VALUES
   (2, 224, 1, 'CKThDImMq3o', 103, 'text'),
   (3, 228, 2, 'HihzFAZ1XbA', 415, 'text'),
   (4, 1, 1, 'FGlhWPwrkDg', 196, 'text'),
-  (5, 1, 2, 'mDYqT0_9VR4', 242, 'text');
+  (5, 1, 2, 'mDYqT0_9VR4', 242, 'text'),
+  (6, 232, 1, 'video_1683714500.mp4', 24, 'file');
 
 -- Create Audio Table
 CREATE TABLE `audio` (
@@ -143,9 +145,7 @@ CREATE TABLE `audio` (
   `audio` varchar(255) DEFAULT NULL,
   `duration` int(11) NOT NULL,
   `storyOrder` int(11) NOT NULL
-) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4;
-
-
+) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4; 
 
 -- Add foreign key
 ALTER TABLE
@@ -166,4 +166,11 @@ MODIFY
   UNIQUE KEY `storyOrder` (`id_story`, `storyOrder`);
 
 INSERT INTO `audio` (`id`, `id_story`, `audio`, `duration`, `storyOrder`) VALUES
-(1, 228, 'audio_1683677229.mp3', 107, 1);
+(1, 228, 'audio_1683677229.mp3', 107, 1),
+(2, 232, 'audio_1683714672.mp3', 68, 2),
+(3, 232, 'audio_1683714865.mp3', 151, 8),
+(4, 232, 'audio_1683714875.mp3', 1, 4),
+(5, 232, 'audio_1683714886.mp3', 1, 3),
+(6, 232, 'audio_1683714893.mp3', 1, 5),
+(7, 232, 'audio_1683714984.mp3', 2, 7),
+(8, 232, 'audio_1683714997.mp3', 2, 6);
