@@ -197,3 +197,16 @@ DROP FOREIGN KEY `audio_ibfk_1`;
 
 ALTER TABLE `audio`
 ADD CONSTRAINT `audio_ibfk_1` FOREIGN KEY (`id_story`) REFERENCES `story` (`id`) ON DELETE CASCADE;
+
+
+-- --------------------------------------------------------
+-- Structure of table `image`
+CREATE TABLE `image` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `storyID` int(11) NOT NULL,
+  `image` varchar(255) DEFAULT NULL,
+  `duration` int(11) NOT NULL,
+  `storyOrder` int(11) NOT NULL,
+  PRIMARY KEY (`id`),
+  FOREIGN KEY (`storyID`) REFERENCES `story` (`id`)  ON DELETE CASCADE
+) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4; 
