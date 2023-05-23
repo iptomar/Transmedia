@@ -210,3 +210,44 @@ CREATE TABLE `image` (
   PRIMARY KEY (`id`),
   FOREIGN KEY (`storyID`) REFERENCES `story` (`id`)  ON DELETE CASCADE
 ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4; 
+
+
+
+
+
+
+-- Structure of the table Text-----------------
+
+CREATE TABLE `text` (
+  `id` int(11) NOT NULL,
+  `id_story` int(11) NOT NULL,
+  `initial_time` varchar(255) NOT NULL,
+  `end_time` varchar(255) NOT NULL,
+  `text` text DEFAULT NULL,
+  `author` varchar(255) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+
+INSERT INTO `text` (`id`, `id_story`, `initial_time`, `end_time`, `text`, `author`) VALUES
+(1, 1, '4', '8', 'ola', 'manuel'),
+(24, 1, '1', '9', 'qwerty', 'filipeguia'),
+(27, 224, '0', '0,12', 'O mundo sabe que pelo teu amor eu sou doente', 'filipeguia'),
+(28, 224, '0,13', '0,25', 'Farei o meu melhor para te ver sempre na frente', 'filipeguia'),
+(29, 224, '0,26', '0,35', 'Irei onde o coração me levar', 'filipeguia'),
+(30, 224, '0,36', '0,51', 'E sem receio farei o que puder pelo meu Sporting', 'filipeguia'),
+(31, 224, '0,52', '0,58', 'E todo mundo sabe que ', 'filipeguia'),
+(32, 224, '0,59', '1,05', 'Pelo teu amor eu sou doente', 'filipeguia'),
+(33, 224, '1,06', '1,18', 'Então farei o meu melhor para te ver sempre na frente', 'filipeguia'),
+(34, 224, '1,19', '1,37', 'E eu farei o que puder pelo meu Sportinggg!', 'filipeguia');
+
+ALTER TABLE `text`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `id_story` (`id_story`);
+
+ALTER TABLE `text`
+ADD
+  CONSTRAINT `text_ibfk_1` FOREIGN KEY (`id_story`) REFERENCES `story` (`id`);
+
+ALTER TABLE `text`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=36;
+----------------------------------------------
