@@ -1,9 +1,6 @@
 @import url('https://fonts.googleapis.com/css2?family=Roboto&display=swap');
 
 
-.content{
-    height: 100vh;
-}
 .content_text{
     display: flex;
     justify-content: center;

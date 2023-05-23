@@ -28,6 +28,14 @@ $stories = $stmt->fetchAll(PDO::FETCH_DEFAULT);
             <?php foreach ($stories as $story) : ?>
                 <div class="col-12 col-sm-6 col-md-4 col-lg-3 mb-3">
                     <div class="story_container text-center">
+                        <div class="row w-100 m-0">
+                            <div class="col-6 p-0">
+                                <a class="btn btn-primary w-100" href="edit_story.php?id=<?= $story['id'] ?>">Edit</a>
+                            </div>
+                            <div class="col-6 p-0">
+                                <a onclick="confirmDelete()" class="btn btn-danger w-100" href="delete_story.php?id=<?= $story['id'] ?>">Delete</a>
+                            </div>
+                        </div>
                         <a class="text-reset text-decoration-none w-100" href="selectedStoryPage.php?id=<?= $story['id'] ?>">
                             <img src="100x100_logo.png" class="img-fluid img-thumbnail w-100" />
                             <p class="w-100 p-1 pl-2 pr-2">
@@ -40,7 +48,18 @@ $stories = $stmt->fetchAll(PDO::FETCH_DEFAULT);
             <?php endforeach; ?>
         </div>
     </div>
-
+    <?php
+    include "footer.php";
+    ?>
 </body>
+<script>
+    // Function prompts the user to confirm the delete before submitting the form
+    function confirmDelete() {
+        const confirmed = confirm('Are you sure you want to delete this?');
+        if (!confirmed) {
+            event.preventDefault(); // prevent the form from submitting if the user doesn't confirm
+        }
+    }
+</script>
 
 </html>
