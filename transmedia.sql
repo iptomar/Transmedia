@@ -165,3 +165,14 @@ ADD
   KEY `id_story` (`id_story`),
 MODIFY
   `id` int(11) NOT NULL AUTO_INCREMENT;
+
+--Add the table text 
+--
+-- Limitadores para a tabela `texto`
+--
+ALTER TABLE
+  `text`
+ADD
+  CONSTRAINT `texto_ibfk_1` FOREIGN KEY (`id_stroy`) REFERENCES `story` (`id`);
+
+--
