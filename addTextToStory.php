@@ -14,7 +14,7 @@ $stmt->execute([$_SESSION['user']]);
 $stories = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
 
-if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['add_image'])) {
+if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['add_text'])) {
     //Get story id
     $storyID = $_POST['id'];
 
@@ -26,32 +26,30 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['add_image'])) {
         alert("ERROR occurred when getting the duration");
         reload_page();
     }
-    //Get image name
-    $image_name = $_FILES['image']['name'];
-    $tmp_name = $_FILES['image']['tmp_name'];
+    
+    //Verify if the end time is greater than the initial time 
+    $initialTime = $_POST['initialtime'];
+    $endTime = $_POST['endtime'];
 
-    $mimeType = mime_content_type($_FILES['image']['tmp_name']);
-    $fileType = explode('/', $mimeType)[0];
-    if (!$fileType == "image") {
-        alert("ERROR file is not a valid image");
-        reload_page();
-    }        
-    //Generate a new name for the image
-    $image = generate_file_name("image_", "image");
-    if (!save_file("./files/story_$storyID/image/", $image, "image")) {
-        alert("ERROR Saving the image");
-        reload_page();
+    if($initialTime > $endTime){
+        alert("The initial time has to be greather than the end time")
+    }else if($endTime > $initialTime){
+        alert("The end time has to be shorter than the initial")
     }
 
-    try {
-        $sql = "INSERT into image(storyID,image,duration,storyOrder) 
-            SELECT ?,?,?,coalesce(MAX(storyOrder),0)+ 1 FROM image WHERE storyID = ?;";
-        $stmt = $pdo->prepare($sql);
-        $stmt->execute([$storyID, $image, $duration, $storyID]);
-        reload_page();
-    } catch (Exception $e) {
-        echo '<script>alert("ERROR occured while connecting to the database")</script>';
+    //Verify if it exists a text in the story that already starts at that initial_time
+    try{
+        $stmt = $pdo->prepare('SELECT initial_time, end_time FROM text where id_story=?');
+        $stmt->execute([$storyID]);
+        $times = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        foreach ($times as $time){
+            echo <p>$time['initial_time']</p>
+        }
+    }catch(e){  
+        alert("Something went wrong")
     }
+    //Upload text to the database 
 }
 
 
@@ -82,12 +80,12 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['add_image'])) {
                     </div>
                     <div class="form-group">
                         <label for="initialtime">Initial Time:</label>
-                        <input class="form-control" type="number" id="initialtime" name="duration" required />
+                        <input class="form-control" type="number" id="initialtime" name="initialtime" required />
                     </div>
         
                     <div class="form-group">
                         <label for="endtime">End Time:</label>
-                        <input class="form-control" type="number" id="endtime" name="duration" required />
+                        <input class="form-control" type="number" id="endtime" name="endtime" required />
                     </div>
 
 
