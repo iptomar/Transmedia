@@ -18,23 +18,14 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['add_text'])) {
     //Get story id
     $storyID = $_POST['id'];
 
-    //Get video duration from hidden input
-    if (isset($_POST["duration"]) && $_POST["duration"] > 0) {
-        $duration =  $_POST["duration"];
-    } else {
-        //If the duration is not set show error message
-        alert("ERROR occurred when getting the duration");
-        reload_page();
-    }
-    
     //Verify if the end time is greater than the initial time 
     $initialTime = $_POST['initialtime'];
     $endTime = $_POST['endtime'];
 
     if($initialTime > $endTime){
-        alert("The initial time has to be greather than the end time")
+        alert("The initial time has to be greather than the end time"); 
     }else if($endTime > $initialTime){
-        alert("The end time has to be shorter than the initial")
+        alert("The end time has to be shorter than the initial"); 
     }
 
     //Verify if it exists a text in the story that already starts at that initial_time
@@ -44,10 +35,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['add_text'])) {
         $times = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
         foreach ($times as $time){
-            echo <p>$time['initial_time']</p>
+            echo "<p>".$time['initial_time']."</p>";
         }
     }catch(e){  
-        alert("Something went wrong")
+        alert("Something went wrong");  
     }
     //Upload text to the database 
 }
@@ -73,6 +64,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['add_text'])) {
             <div class="card-header text-center">Add Text</div>
             <div class="card-body">
                 <form method="post" id="form-image" enctype="multipart/form-data">
+                    <input type="hidden" id="storyID" name="id" value="<?= isset($_GET['id']) ?  $_GET['id'] : "" ?>" />
                     <div id="previewimage"></div>
 
                     <div class="form-group">
