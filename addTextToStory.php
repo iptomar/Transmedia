@@ -23,9 +23,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['add_text'])) {
     $endTime = $_POST['endtime'];
 
     if($initialTime > $endTime){
-        alert("The initial time has to be greather than the end time"); 
-    }else if($endTime > $initialTime){
-        alert("The end time has to be shorter than the initial"); 
+        alert("The end time has to be greather than the initial time"); 
     }
 
     //Verify if it exists a text in the story that already starts at that initial_time
