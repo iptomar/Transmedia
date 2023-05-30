@@ -129,6 +129,16 @@ if ($audios_duration > $total_duration) {
             <div class="modal-content">
                 <div class="modal-body">
                     <?php include "addImageToStory.php"; ?>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="changeImgDuration" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-body">
+                    <?php include "edit_image_duration.php"; ?>
 
                 </div>
             </div>
@@ -284,6 +294,7 @@ if ($audios_duration > $total_duration) {
                                     echo    '</div>
                                         </div>';
                                     echo '<div class="img-div" ><img style="height:100px; width: auto; max-width:100%" src="./files/story_' . $image["storyId"] . '/image/' . $image["image"] . '"></img></div>';
+                                    echo '<button  type="button" class="btn-primary w-100" data-toggle="modal" data-target="#changeImgDuration" data-duration="'. $image["duration"].'"  data-image="'. $image["id"].'" class="w-100  btn-primary">🕑</button>';
                                     echo '<span class="duration"></span>';
                                     echo "</div>";
                                     $i++;
@@ -306,6 +317,15 @@ if ($audios_duration > $total_duration) {
     ?>
 
     <script>
+        $('#changeImgDuration').on('show.bs.modal', function(event) {
+            console.log("MODAL OPENED")
+            var button = $(event.relatedTarget) 
+            var duration = button.data('duration') 
+            var id = button.data('image') 
+            var modal = $(this)
+            modal.find('.modal-body #duration').val(duration)
+            modal.find('.modal-body #imageID').val(id)
+        })
         // Function prompts the user to confirm the delete before submitting the form
         function confirmDelete() {
             const confirmed = confirm('Are you sure you want to delete this?');
