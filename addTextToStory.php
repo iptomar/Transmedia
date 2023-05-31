@@ -19,16 +19,21 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['add_text'])) {
     $storyID = $_POST['id'];
 
     //Verify if the end time is greater than the initial time 
-    $initialTime = $_POST['initialtime'];
-    $endTime = $_POST['endtime'];
+    $duration 
+    /*$initialTime = $_POST['initialtime'];
+    $endTime = $_POST['endtime'];*/
 
-    if($initialTime > $endTime){
-        alert("The end time has to be greather than the initial time"); 
+    if($duration < 0){
+        alert("The duration has to be greater than 0"); 
     }
+
+    /*{if($initialTime > $endTime){
+        alert("The end time has to be greather than the initial time"); 
+    }*/
 
     //Verify if it exists a text in the story that already starts at that initial_time
     try{
-        $stmt = $pdo->prepare('SELECT initial_time, end_time FROM text where id_story=?');
+        $stmt = $pdo->prepare('SELECT /*initial_time, end_time*/ duration FROM text where id_story=?');
         $stmt->execute([$storyID]);
         $times = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
@@ -38,7 +43,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['add_text'])) {
     }catch(e){  
         alert("Something went wrong");  
     }
-    //Upload text to the database 
+    
+    //Upload text to the database
+
 }
 
 
