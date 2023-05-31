@@ -15,24 +15,29 @@ $stories = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
 
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['add_text'])) {
-    //Get story id
+    
+    //Get story id, duration, text, author
     $storyID = $_POST['id'];
+    $duration = $_POST['duration'];
+    $text = $_POST['text'];
+    $author = $_SESSION['user'];
 
-    //Verify if the end time is greater than the initial time 
-    $duration 
-    /*$initialTime = $_POST['initialtime'];
-    $endTime = $_POST['endtime'];*/
 
     if($duration < 0){
         alert("The duration has to be greater than 0"); 
     }
 
-    /*{if($initialTime > $endTime){
-        alert("The end time has to be greather than the initial time"); 
-    }*/
     
     //Upload text to the database
-    
+    try {
+        $sql = "INSERT into text(id_story,text,duration,author,storyOrder) 
+            SELECT ?,?,?,?,coalesce(MAX(storyorder),0)+ 1 FROM text WHERE id_story = ?;";
+        $stmt = $pdo->prepare($sql);
+        $stmt->execute([$storyID, $text, $duration, $author, $storyID]);
+        //reload_page();
+    } catch (Exception $e) {
+        echo '<script>alert("ERROR occured while connecting to the database")</script>';
+    }
 }
 
 
@@ -63,15 +68,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['add_text'])) {
                         <input type="text" class="form-control" id="text" name="text" placeholder="Insert your text..." required>
                     </div>
                     <div class="form-group">
-                        <label for="initialtime">Initial Time:</label>
-                        <input class="form-control" type="number" id="initialtime" name="initialtime" required />
+                        <label for="duration">Duration:</label>
+                        <input class="form-control" type="number" id="duration" name="duration" required />
                     </div>
-        
-                    <div class="form-group">
-                        <label for="endtime">End Time:</label>
-                        <input class="form-control" type="number" id="endtime" name="endtime" required />
-                    </div>
-
 
                     <button type="submit" name="add_text" class="w-100 btn btn-primary" style="margin-top: 10px">Add Text</button>
                 </form>
