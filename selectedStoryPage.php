@@ -1,53 +1,568 @@
 <?php
 require "config/connectdb.php";
+include "./functions/useful.php";
 
-$story = $pdo->prepare('SELECT name,description,author FROM story WHERE id= ?');
+$story = $pdo->prepare('SELECT story.name,story.description,story.author, story.id FROM story WHERE story.id = ?');
+$video = $pdo->prepare('SELECT video.link,video.storyId,video.videoType,video.storyOrder,video.duration FROM video WHERE video.storyId = ? ORDER BY video.storyOrder');
+$audio = $pdo->prepare('SELECT audio.id,audio.id_story,audio.audio,audio.storyOrder FROM audio WHERE audio.id_story = ? ORDER BY audio.storyOrder');
 $story->execute([$_GET['id']]);
+$video->execute([$_GET['id']]);
+$audio->execute([$_GET['id']]);
 $storyFetch = $story->fetch(PDO::FETCH_ASSOC);
+$videoFetch = $video->fetchAll(PDO::FETCH_ASSOC);
+$audioFetch = $audio->fetchAll(PDO::FETCH_ASSOC);
+$totalDuration = 0;
+
+foreach ($videoFetch as $video) {
+    $totalDuration += $video["duration"];
+}
+
 ?>
 
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+    <link href="./style/selected_story_page.css" type="text/css">
     <title>Story Selected</title>
 </head>
-<body>
-    <?php
-    include "NavBar.php";
-    ?>
-    <div class="Name">
-        <label for="name" style="font-size:20px; font-weight: bold;">Name</label>
-        <p>
-        <?php
-            print($storyFetch['name'])
-        ?>
-        </p>
-    </div>
 
-    <div class="description">
-        <label for="description" style="font-size:20px; font-weight: bold;">Description</label>
-        <p>
+<body onload="inic()">
+    <div class="mb-3">
         <?php
-            if(print($storyFetch['description'] = null)){
-                print("no description");
-            }else{
-                print($storyFetch['description']);
-            }
+        include "NavBar.php";
         ?>
-        </p>
-    </div>
+        <div class="container card mt-5">
+            <div class="card-body text-center">
+                <div class="Name">
+                    <label for="name" style="font-size:20px; font-weight: bold;">Name</label>
+                    <p>
+                        <?php
+                        print($storyFetch['name'])
+                        ?>
+                    </p>
+                </div>
 
-    <div class="author">
-        <label for="author" style="font-size:20px; font-weight: bold;">Author</label>
-        <p>
-        <?php
-            print($storyFetch['author'])
-        ?>
-        </p>
+                <div class="description">
+                    <label for="description" style="font-size:20px; font-weight: bold;">Description</label>
+                    <p>
+                        <?php
+                        if ($storyFetch['description'] == null) {
+                            print("no description");
+                        } else {
+                            print($storyFetch['description']);
+                        }
+                        ?>
+                    </p>
+                </div>
+
+                <div class="author">
+                    <label for="author" style="font-size:20px; font-weight: bold;">Author</label>
+                    <p>
+                        <?php
+                        print($storyFetch['author'])
+                        ?>
+                    </p>
+                </div>
+
+                <div class="change-media">
+
+                    <form method="post" onsubmit="onSwitch()">
+                        <?php
+
+                        if (isset($videoFetch) && !empty($videoFetch)) {
+                            echo '<input style="cursor: pointer;" class="bg-primary text-white media-button rounded border-0 m-2 p-2" type="submit" name="mediaOpt" value="video"/>';
+                        }
+                        if (isset($audioFetch) && !empty($audioFetch)) {
+                            echo '<input style="cursor: pointer;" class="bg-primary text-white media-button rounded border-0 m-2 p-2" type="submit" name="mediaOpt" value="audio"/>';
+                        }
+                        if (isset($imagesFetch) && !empty($imagesFetch)) {
+                            echo '<input style="cursor: pointer;" class="bg-primary text-white media-button rounded border-0 m-2 p-2" type="submit" name="mediaOpt" value="images"/>';
+                        }
+                        if (isset($textFetch) && !empty($textFetch)) {
+                            echo '<input style="cursor: pointer;" class="bg-primary text-white media-button rounded border-0 m-2 p-2" type="submit" name="mediaOpt" value="text"/>';
+                        }
+
+                        ?>
+
+
+                    </form>
+
+                </div>
+
+                <div id="mediaDiv" class="mt-3">
+                    <?php
+                    //tratamento variavel sessao de opcao de meio
+                    if (isset($_POST["mediaOpt"])) {
+                        $_SESSION["mediaOpt"] = $_POST["mediaOpt"];
+                    } else {
+                        $_SESSION["mediaOpt"] = "video";
+                    }
+
+                    $mediaOpt = $_SESSION["mediaOpt"];
+
+                    if (count($videoFetch) + count($audioFetch) == 0){
+                        echo "<p>Sem conteúdo para apresentar</p>";
+                    }else{
+                        switch ($mediaOpt) {
+
+                            case "video":
+    
+                                for ($i = 0; $i < count($videoFetch); $i++) {
+                                    echo '<div style="width:0px; height:0px; display: none;" id="preview' . $i . '" class="video-preview embed-responsive embed-responsive-16by9 d-inline-block rounded">';
+                                    if ($videoFetch[$i]["videoType"] == "file") {
+                                        echo '<video style="display: none;" id="player' . $i . '" onplay="queueManager(this)" onended="playAdjacentPlayer(\'right\')" class ="video-audio player video-class embed-responsive-item" controls src="./files/story_' . $videoFetch[$i]["storyId"] . '/video/' . $videoFetch[$i]["link"] . '"></video>';
+                                    } elseif ($videoFetch[$i]["videoType"] == "text") {
+                                        echo '<iframe style="display: none;" id="player' . $i . '" class ="player video-class embed-responsive-item" type="text/html" src="https://www.youtube.com/embed/' . $videoFetch[$i]["link"] . '?enablejsapi=1" allowfullscreen="true" allow="autoplay" allowscriptaccess="always"></iframe>'; //add iframe with src pointing to the video with this code
+                                    }
+                                    echo '</div>';
+                                }
+                                break;
+    
+                            case "audio":
+    
+                                for ($i = 0; $i < count($audioFetch); $i++) {
+                                    echo '<div style="width:0px; height:0px; display: none;" id="preview' . $i . '" class="audio-preview">';
+                                    echo '<audio style="display: none;" class=" video-audio player audio-class" onplay="queueManager(this)" onended="playAdjacentPlayer(\'right\')" controls id="audio-player-' . $i . '" src="./files/story_' . $audioFetch[$i]["id_story"] . '/audio/' . $audioFetch[$i]["audio"] . '"></audio>';
+                                    echo '</div>';
+                                }
+                                break;
+                            case "images":
+                                echo "Yet To Be Implemented";
+                                break;
+                            case "text":
+                                echo "Yet To Be Implemented";
+                                break;
+                        }
+    
+                        echo <<<EOF
+    
+                        <div id="adjVidButDiv">
+                            <button id="prevVidButton" style="color: white; background-color: #007bff; border: 0px; height:30px; width: 25%; border-radius: 4px; cursor: pointer;" class="adj-button" onclick="playAdjacentPlayer('left')"><b>|<<</b></button>
+                            <button id="nextVidButton" style="color: white; background-color: #007bff; border: 0px; height:30px; width: 25%; border-radius: 4px; cursor: pointer;" class="adj-button" onclick="playAdjacentPlayer('right')"><b>>>|</b></button>
+                        </div>
+    
+                        EOF;
+                    }
+
+                    ?>
+                </div>
+            </div>
+
+        </div>
     </div>
 </body>
+
+<script>
+    //all tagName="VIDEO" video players
+    var videoPlayer = document.getElementsByTagName("video").length > 0 ? document.getElementsByTagName("video") : [];
+
+    //all tagName="IFRAME" video players
+    var youtubePlayer = document.getElementsByTagName("iframe").length > 0 ? document.getElementsByTagName("iframe") : [];
+
+    //array with all the players
+    var allPlayers;
+
+    //array with all the video players
+    var allVideoPlayers = document.getElementsByClassName("video-class");
+
+    //all players that are not an <iframe>
+    var allPlayersNoIframe = document.getElementsByClassName("video-audio");
+
+    //array with all the audio players
+    var allAudioPlayers = document.getElementsByClassName("audio-class");
+
+    //total story time
+    var totalStoryElapsedTime = 0;
+
+    //queue for player management
+    var queue = [];
+
+    //function to be called on <body> load
+    function inic() {
+
+        allPlayers = document.getElementsByClassName("player");
+
+        if (sessionStorage.getItem("storyId") != <?= $storyFetch['id'] ?>) {
+            sessionStorage.setItem("totalStoryElapsedTime", 0);
+            sessionStorage.setItem("storyId", <?= $storyFetch['id'] ?>)
+        }
+
+
+
+        console.log(sessionStorage.getItem("totalStoryElapsedTime"));
+
+        //wait time in milliseconds
+        var waitTimeMillis = allPlayers.length * 500;
+
+        //variable to count the players with tag = "IFRAME"
+        let count = -1;
+        //iterate through all video players
+        for (i = 0; i < allPlayers.length; i++) {
+            // if one happens to have tag = "IFRAME"
+            if (allPlayers[i].tagName == "IFRAME") {
+                //increment count by 1
+                count++;
+                //call the method to prepare the YouTube API for this element
+                onYouTubeIframeAPIReady("player" + i, count);
+
+            }
+        }
+
+        playWithElapsedTime(waitTimeMillis);
+    }
+
+    const sleep = (ms) =>
+        new Promise(resolve => setTimeout(resolve, ms));
+
+    //function that retrieves the actual elapsed story time
+    function getTotalElapsedStoryTime() {
+        //var with time
+        var cumulativeTime = 0;
+        //get the actual media player
+        var actualPlayer = queue.pop();
+        //put the media player back in the queue
+        queue.push(actualPlayer);
+        //actions to take if the actual player is
+        //of a tag=<video> video or tag=<audio>
+        if (actualPlayer.tagName == "VIDEO" || actualPlayer.tagName == "AUDIO") {
+            //get the story order of the actual video or audio
+            var actualPlayerIndex = Array.prototype.slice.call(allPlayers).indexOf(actualPlayer);
+            cumulativeTime += getPlayerCurrentTime(actualPlayer);
+        } else {
+            //get the story order of the actual YouTube video
+            var actualPlayerIndex = Array.prototype.slice.call(allPlayers).indexOf(actualPlayer.g);
+            cumulativeTime += getYTPlayerCurrentTime(actualPlayer);
+        }
+
+        //the actions for the previous videos are equivalent
+        //except it was used the total duration funtion for 
+        //each video type
+        for (i = actualPlayerIndex - 1; i >= 0; i--) {
+            if (allPlayers[i].tagName == "VIDEO" || allPlayers[i].tagName == "AUDIO") {
+                cumulativeTime += getPlayerDuration(allPlayers[i]);
+            } else {
+                for (j = 0; j < player.length; j++) {
+                    if (player[j].g == allPlayers[i]) {
+                        cumulativeTime += getYTPlayerDuration(player[j]);
+                        break;
+                    }
+                }
+            }
+        }
+
+        console.log(cumulativeTime);
+        return cumulativeTime;
+    }
+
+    //function to call when the buttons form is submited
+    function onSwitch() {
+
+        //set the session variable with the elapsed story time
+        sessionStorage.setItem("totalStoryElapsedTime", getTotalElapsedStoryTime());
+
+        //empty the queue on switching
+        queue.length = 0;
+    }
+
+
+    //function to play the current player
+    //acording to the elapsed story time
+    async function playWithElapsedTime(waitTimeMillis) {
+        await sleep(waitTimeMillis);
+
+        //store total elapsed time in variable
+        //(this variable is to later store The
+        //current time of the current player)
+        var actualPlayerTime = sessionStorage.getItem("totalStoryElapsedTime");
+
+        //varible to store actual player
+        var actualPlayer;
+
+        //variable to store YouTube player
+        var ytPlayer;
+
+        //varible to store iframe
+        var iframe;
+
+        for (i = 0; i < allPlayers.length; i++) {
+            if (allPlayers[i].tagName == "VIDEO" || allPlayers[i].tagName == "AUDIO") {
+                if (getPlayerDuration(allPlayers[i]) > actualPlayerTime) {
+                    actualPlayer = allPlayers[i];
+                    break;
+                }
+                actualPlayerTime -= getPlayerDuration(allPlayers[i]);
+
+            } else if (allPlayers[i].tagName == "IFRAME") {
+                for (j = 0; j < player.length; j++) {
+                    if (player[j].g == allPlayers[i]) {
+                        ytPlayer = player[j];
+                        iframe = allPlayers[i];
+                        break;
+                    }
+                }
+                if (getYTPlayerDuration(ytPlayer) > actualPlayerTime) {
+                    actualPlayer = ytPlayer;
+                    break;
+                }
+                actualPlayerTime -= getYTPlayerDuration(allPlayers[i]);
+            }
+        }
+
+        queueManager(actualPlayer);
+
+        if (actualPlayer.tagName == "VIDEO") {
+            actualPlayer.currentTime = actualPlayerTime;
+            actualPlayer.style.display = "inline";
+            actualPlayer.style.width = "640px";
+            actualPlayer.style.height = "360px";
+            actualPlayer.parentElement.style.display = "inline";
+            actualPlayer.parentElement.style.width = "640px";
+            actualPlayer.parentElement.style.height = "360px";
+            actualPlayer.play();
+        } else if (actualPlayer.tagName == "AUDIO") {
+            actualPlayer.currentTime = actualPlayerTime;
+            actualPlayer.style.display = "inline";
+            actualPlayer.style.width = "640px";
+            actualPlayer.style.height = "100px";
+            actualPlayer.parentElement.style.display = "inline";
+            actualPlayer.parentElement.style.width = "640px";
+            actualPlayer.parentElement.style.height = "100px";
+            actualPlayer.play();
+        } else {
+            actualPlayer.loadVideoByUrl(iframe.getAttribute("src"), actualPlayerTime, 'large');
+            actualPlayer.g.style.display = "inline";
+            actualPlayer.g.style.width = "640px";
+            actualPlayer.g.style.height = "360px";
+            actualPlayer.g.parentElement.style.display = "inline";
+            actualPlayer.g.parentElement.style.width = "640px";
+            actualPlayer.g.parentElement.style.height = "360px";
+        }
+    }
+
+    function getNextPlayerIndex(Player) {
+
+        var adjacentPlayerIndex = 0;
+
+        if (Player.tagName == "VIDEO" || Player.tagName == "AUDIO") {
+            //get the story order of the actual video or audio
+            adjacentPlayerIndex = Array.prototype.slice.call(allPlayers).indexOf(Player) + 1;
+
+            Player.pause();
+            Player.currentTime = 0;
+            Player.style.display = "none";
+            Player.style.width = 0;
+            Player.style.height = 0;
+            Player.parentElement.style.display = "none";
+            Player.parentElement.style.width = 0;
+            Player.parentElement.style.height = 0;
+
+        } else {
+            //get the story order of the actual YouTube video
+            adjacentPlayerIndex = Array.prototype.slice.call(allPlayers).indexOf(Player.g) + 1;
+
+            Player.stopVideo();
+            Player.g.style.display = "none";
+            Player.g.style.width = 0;
+            Player.g.style.height = 0;
+            Player.g.parentElement.style.display = "none";
+            Player.g.parentElement.style.width = 0;
+            Player.g.parentElement.style.height = 0;
+        }
+
+        //verify if there are more players
+        if (adjacentPlayerIndex == allPlayers.length) {
+            adjacentPlayerIndex = 0;
+        }
+
+        return adjacentPlayerIndex;
+    }
+
+    function getPreviousPlayerIndex(Player) {
+
+        var adjacentPlayerIndex = 0;
+
+        if (Player.tagName == "VIDEO" || Player.tagName == "AUDIO") {
+            //get the story order of the actual video or audio
+            adjacentPlayerIndex = Array.prototype.slice.call(allPlayers).indexOf(Player) - 1;
+
+            Player.pause();
+            Player.currentTime = 0;
+            Player.style.display = "none";
+            Player.style.width = 0;
+            Player.style.height = 0;
+            Player.parentElement.style.display = "none";
+            Player.parentElement.style.width = 0;
+            Player.parentElement.style.height = 0;
+
+        } else {
+            //get the story order of the actual YouTube video
+            adjacentPlayerIndex = Array.prototype.slice.call(allPlayers).indexOf(Player.g) - 1;
+
+            Player.stopVideo();
+            Player.g.style.display = "none";
+            Player.g.style.width = 0;
+            Player.g.style.height = 0;
+            Player.g.parentElement.style.display = "none";
+            Player.g.parentElement.style.width = 0;
+            Player.g.parentElement.style.height = 0;
+        }
+
+        //verify if there are more players
+        if (adjacentPlayerIndex == -1) {
+            adjacentPlayerIndex = allPlayers.length-1;
+        }
+
+        return adjacentPlayerIndex;
+    }
+
+    function playAdjacentPlayer(adjacency) {
+
+        var adjacentPlayerIndex;
+
+        var Player = queue.pop();
+
+        if (adjacency == "left") {
+            adjacentPlayerIndex = getPreviousPlayerIndex(Player);
+        } else {
+            adjacentPlayerIndex = getNextPlayerIndex(Player);
+        }
+
+        //queue.push(allPlayers[adjacentPlayerIndex]);
+
+        if (allPlayers[adjacentPlayerIndex].tagName == "VIDEO") {
+            allPlayers[adjacentPlayerIndex].style.display = "inline";
+            allPlayers[adjacentPlayerIndex].style.width = "640px";
+            allPlayers[adjacentPlayerIndex].style.height = "360px";
+            allPlayers[adjacentPlayerIndex].parentElement.style.display = "inline";
+            allPlayers[adjacentPlayerIndex].parentElement.style.width = "640px";
+            allPlayers[adjacentPlayerIndex].parentElement.style.height = "360px";
+            allPlayers[adjacentPlayerIndex].play();
+        } else if (allPlayers[adjacentPlayerIndex].tagName == "AUDIO") {
+            allPlayers[adjacentPlayerIndex].style.display = "inline";
+            allPlayers[adjacentPlayerIndex].style.width = "640px";
+            allPlayers[adjacentPlayerIndex].style.height = "100px";
+            allPlayers[adjacentPlayerIndex].parentElement.style.display = "inline";
+            allPlayers[adjacentPlayerIndex].parentElement.style.width = "640px";
+            allPlayers[adjacentPlayerIndex].parentElement.style.height = "100px";
+            allPlayers[adjacentPlayerIndex].play();
+        } else {
+            //get YouTube player to play it
+            for (j = 0; j < player.length; j++) {
+                if (player[j].g == allPlayers[adjacentPlayerIndex]) {
+                    allPlayers[adjacentPlayerIndex].style.display = "inline";
+                    allPlayers[adjacentPlayerIndex].style.width = "640px";
+                    allPlayers[adjacentPlayerIndex].style.height = "360px";
+                    allPlayers[adjacentPlayerIndex].parentElement.style.display = "inline";
+                    allPlayers[adjacentPlayerIndex].parentElement.style.width = "640px";
+                    allPlayers[adjacentPlayerIndex].parentElement.style.height = "360px";
+                    player[j].playVideo();
+                    break;
+                }
+            }
+        }
+    }
+
+    //return player (tag <video> or <audio>) time mark position
+    function getPlayerCurrentTime(player) {
+        return Math.round(player.currentTime);
+    }
+
+    //return player (tag <video> or <audio>) duration
+    function getPlayerDuration(player) {
+        return Math.round(player.duration);
+    }
+
+    //function to manage the queue for video media type
+    function queueManager(Player) {
+        //only push into queue when the video player
+        //doesn't exist alerady in the queue
+        if (!queue.includes(Player)) {
+            queue.push(Player);
+        }
+
+        //if there is more than one video playing
+        if (queue.length > 1) {
+            //retrieve last video
+            lastPlay = queue.shift();
+            //actions to take to stop
+            //if lastPlay has tag name "VIDEO"
+            if (lastPlay.tagName == "VIDEO" || lastPlay.tagName == "AUDIO") {
+                //console.log(lastPlay)
+                lastPlay.pause();
+                lastPlay.currentTime = 0;
+                lastPlay.style.display = "none";
+                lastPlay.parentElement.style.width = 0;
+                lastPlay.parentElement.style.height = 0;
+                lastPlay.parentElement.style.display = "none";
+                lastPlay.parentElement.style.width = 0;
+                lastPlay.parentElement.style.height = 0;
+            } else {
+                //console.log(lastPlay)
+                lastPlay.stopVideo();
+                lastPlay.g.style.display = "none";
+                lastPlay.g.parentElement.style.width = 0;
+                lastPlay.g.parentElement.style.height = 0;
+                lastPlay.g.parentElement.style.display = "none";
+                lastPlay.g.parentElement.style.width = 0;
+                lastPlay.g.parentElement.style.height = 0;
+            }
+        }
+        getTotalElapsedStoryTime();
+    }
+
+    //This code loads the IFrame Player API code asynchronously.
+    var tag = document.createElement('script');
+
+    tag.src = "https://www.youtube.com/iframe_api";
+    var firstScriptTag = document.getElementsByTagName('script')[0];
+    firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+
+    //array to store all YouTube players
+    var player = [];
+
+    //This function creates an <iframe> (and YouTube player)
+    //after the API code downloads.
+    function onYouTubeIframeAPIReady(id, i) {
+        player[i] = new YT.Player("" + id, {
+            playerVars: {
+                'autoplay': 0,
+                'controls': 1
+            },
+            events: {
+                'onReady': onPlayerReady,
+                'onStateChange': onPlayerStateChange
+            }
+        });
+    }
+
+    //The API will call this function when the video player is ready.
+    function onPlayerReady() {
+        console.log("Player ready");
+    }
+
+    //The API calls this function when the player's state changes.
+    function onPlayerStateChange(event) {
+        if (event.target.getPlayerState() == YT.PlayerState.PLAYING) {
+            queueManager(event.target);
+        } else if (event.target.getPlayerState() == YT.PlayerState.ENDED) {
+            playAdjacentPlayer("right");
+        }
+    }
+
+    //function to get time mark position of an YouTube video
+    function getYTPlayerCurrentTime(YTPlayer) {
+        return Math.round(YTPlayer.getCurrentTime());
+    }
+
+    //function to get duration of an YouTube video
+    function getYTPlayerDuration(YTPlayer) {
+        return Math.round(YTPlayer.getDuration());
+    }
+</script>
+
 </html>

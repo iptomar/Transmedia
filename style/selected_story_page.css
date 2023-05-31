@@ -1,0 +1,5 @@
+.media-button:hover{
+    background-color: #2c8dc5 !important;
+    color: #fff !important;
+    transition: 0.5s !important;
+}

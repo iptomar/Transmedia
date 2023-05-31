@@ -19,15 +19,16 @@ if (session_status() === PHP_SESSION_NONE) {
 
   <div class="collapse navbar-collapse" id="navbarTogglerDemo02">
     <ul class="navbar-nav mx-auto mt-2 mt-lg-0">
-      <li class="nav-item">
+      <?php
+      //Hide links that the user does not have permission to access if they are not logged in
+      if (isset($_SESSION["user"])) {
+        echo '<li class="nav-item">
         <a class="nav-link" href="createStory.php">Create Story</a>
       </li>
       <li class="nav-item">
         <a class="nav-link" href="my_stories.php">My Stories</a>
-      </li>
-      <li class="nav-item">
-        <a class="nav-link" href="addVideoToStory.php">Add Video</a>
-      </li>
+      </li>';
+      } ?>
     </ul>
     <?php
     //Verify if user is logged in, if he is instead of login and register button show logout button

@@ -11,7 +11,7 @@ $error = '';
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $login_method = $_POST["login_method"];
     $password = $_POST["password"];
-    
+
     //Select user with the username or email
     $sql = 'SELECT username,email,password,verified from user WHERE username = ? OR email=? LIMIT 1';
     $stmt = $pdo->prepare($sql);
@@ -42,6 +42,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/css/bootstrap.min.css" integrity="sha384-TX8t27EcRE3e/ihU7zmQxVncDAy5uIKz4rEkgIXeMed4M0jlfIDPvg6uqKI2xXr2" crossorigin="anonymous">
     <title>Login</title>
     <style>
@@ -78,5 +79,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             </div>
         </div>
     </div>
+    <?php
+    include "footer.php";
+    ?>
 
 </html>
