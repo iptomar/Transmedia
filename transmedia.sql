@@ -145,7 +145,7 @@ CREATE TABLE `audio` (
   `audio` varchar(255) DEFAULT NULL,
   `duration` int(11) NOT NULL,
   `storyOrder` int(11) NOT NULL
-) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4; 
+) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4;
 
 -- Add foreign key
 ALTER TABLE
@@ -162,42 +162,53 @@ ADD
   KEY `id_story` (`id_story`),
 MODIFY
   `id` int(11) NOT NULL AUTO_INCREMENT,
- ADD
+ADD
   UNIQUE KEY `storyOrder` (`id_story`, `storyOrder`);
 
-INSERT INTO `audio` (`id`, `id_story`, `audio`, `duration`, `storyOrder`) VALUES
-(1, 228, 'audio_1683677229.mp3', 107, 1),
-(2, 232, 'audio_1683714672.mp3', 68, 2),
-(3, 232, 'audio_1683714865.mp3', 151, 8),
-(4, 232, 'audio_1683714875.mp3', 1, 4),
-(5, 232, 'audio_1683714886.mp3', 1, 3),
-(6, 232, 'audio_1683714893.mp3', 1, 5),
-(7, 232, 'audio_1683714984.mp3', 2, 7),
-(8, 232, 'audio_1683714997.mp3', 2, 6);
-
-
--- Alter the table to add ON DELETE CASCADE to foreign key constraint
-ALTER TABLE `story`
-DROP FOREIGN KEY `story_ibfk_1`;
-
-ALTER TABLE `story`
-ADD FOREIGN KEY (`author`) REFERENCES `user` (`username`) ON DELETE CASCADE;
-
--- Alter the table to add ON DELETE CASCADE to foreign key constraint
-ALTER TABLE `video`
-DROP FOREIGN KEY `video_ibfk_1`;
-
-ALTER TABLE `video`
-ADD CONSTRAINT `video_ibfk_1` FOREIGN KEY (`storyId`) REFERENCES `story` (`id`) ON DELETE CASCADE;
-
+INSERT INTO
+  `audio` (
+    `id`,
+    `id_story`,
+    `audio`,
+    `duration`,
+    `storyOrder`
+  )
+VALUES
+  (1, 228, 'audio_1683677229.mp3', 107, 1),
+  (2, 232, 'audio_1683714672.mp3', 68, 2),
+  (3, 232, 'audio_1683714865.mp3', 151, 8),
+  (4, 232, 'audio_1683714875.mp3', 1, 4),
+  (5, 232, 'audio_1683714886.mp3', 1, 3),
+  (6, 232, 'audio_1683714893.mp3', 1, 5),
+  (7, 232, 'audio_1683714984.mp3', 2, 7),
+  (8, 232, 'audio_1683714997.mp3', 2, 6);
 
 -- Alter the table to add ON DELETE CASCADE to foreign key constraint
-ALTER TABLE `audio`
-DROP FOREIGN KEY `audio_ibfk_1`;
+ALTER TABLE
+  `story` DROP FOREIGN KEY `story_ibfk_1`;
 
-ALTER TABLE `audio`
-ADD CONSTRAINT `audio_ibfk_1` FOREIGN KEY (`id_story`) REFERENCES `story` (`id`) ON DELETE CASCADE;
+ALTER TABLE
+  `story`
+ADD
+  FOREIGN KEY (`author`) REFERENCES `user` (`username`) ON DELETE CASCADE;
 
+-- Alter the table to add ON DELETE CASCADE to foreign key constraint
+ALTER TABLE
+  `video` DROP FOREIGN KEY `video_ibfk_1`;
+
+ALTER TABLE
+  `video`
+ADD
+  CONSTRAINT `video_ibfk_1` FOREIGN KEY (`storyId`) REFERENCES `story` (`id`) ON DELETE CASCADE;
+
+-- Alter the table to add ON DELETE CASCADE to foreign key constraint
+ALTER TABLE
+  `audio` DROP FOREIGN KEY `audio_ibfk_1`;
+
+ALTER TABLE
+  `audio`
+ADD
+  CONSTRAINT `audio_ibfk_1` FOREIGN KEY (`id_story`) REFERENCES `story` (`id`) ON DELETE CASCADE;
 
 -- --------------------------------------------------------
 -- Structure of table `image`
@@ -208,52 +219,110 @@ CREATE TABLE `image` (
   `duration` int(11) NOT NULL,
   `storyOrder` int(11) NOT NULL,
   PRIMARY KEY (`id`),
-  FOREIGN KEY (`storyID`) REFERENCES `story` (`id`)  ON DELETE CASCADE
-) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4; 
-
-
-
-
-
+  FOREIGN KEY (`storyID`) REFERENCES `story` (`id`) ON DELETE CASCADE
+) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4;
 
 -- Structure of the table Text-----------------
-
 CREATE TABLE `text` (
   `id` int(11) NOT NULL,
   `id_story` int(11) NOT NULL,
-  `initial_time` varchar(255) NOT NULL,
-  `end_time` varchar(255) NOT NULL,
+  `duration` varchar(255) NOT NULL,
+  `storyorder` varchar(255) NOT NULL,
   `text` text DEFAULT NULL,
   `author` varchar(255) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4;
 
+INSERT INTO
+  `text` (
+    `id`,
+    `id_story`,
+    `duration`,
+    `storyorder`,
+    `text`,
+    `author`
+  )
+VALUES
+  (1, 1, '4', '1', 'ola', 'manuel'),
+  (24, 1, '1', '2', 'qwerty', 'filipeguia'),
+  (
+    27,
+    224,
+    '0',
+    '1',
+    'O mundo sabe que pelo teu amor eu sou doente',
+    'filipeguia'
+  ),
+  (
+    28,
+    224,
+    '0,13',
+    '2',
+    'Farei o meu melhor para te ver sempre na frente',
+    'filipeguia'
+  ),
+  (
+    29,
+    224,
+    '0,26',
+    '3',
+    'Irei onde o coração me levar',
+    'filipeguia'
+  ),
+  (
+    30,
+    224,
+    '0,36',
+    '4',
+    'E sem receio farei o que puder pelo meu Sporting',
+    'filipeguia'
+  ),
+  (
+    31,
+    224,
+    '0,52',
+    '5',
+    'E todo mundo sabe que ',
+    'filipeguia'
+  ),
+  (
+    32,
+    224,
+    '0,59',
+    '6',
+    'Pelo teu amor eu sou doente',
+    'filipeguia'
+  ),
+  (
+    33,
+    224,
+    '1,06',
+    '7',
+    'Então farei o meu melhor para te ver sempre na frente',
+    'filipeguia'
+  ),
+  (
+    34,
+    224,
+    '1,19',
+    '8',
+    'E eu farei o que puder pelo meu Sportinggg!',
+    'filipeguia'
+  );
 
-INSERT INTO `text` (`id`, `id_story`, `initial_time`, `end_time`, `text`, `author`) VALUES
-(1, 1, '4', '8', 'ola', 'manuel'),
-(24, 1, '1', '9', 'qwerty', 'filipeguia'),
-(27, 224, '0', '0,12', 'O mundo sabe que pelo teu amor eu sou doente', 'filipeguia'),
-(28, 224, '0,13', '0,25', 'Farei o meu melhor para te ver sempre na frente', 'filipeguia'),
-(29, 224, '0,26', '0,35', 'Irei onde o coração me levar', 'filipeguia'),
-(30, 224, '0,36', '0,51', 'E sem receio farei o que puder pelo meu Sporting', 'filipeguia'),
-(31, 224, '0,52', '0,58', 'E todo mundo sabe que ', 'filipeguia'),
-(32, 224, '0,59', '1,05', 'Pelo teu amor eu sou doente', 'filipeguia'),
-(33, 224, '1,06', '1,18', 'Então farei o meu melhor para te ver sempre na frente', 'filipeguia'),
-(34, 224, '1,19', '1,37', 'E eu farei o que puder pelo meu Sportinggg!', 'filipeguia');
+ALTER TABLE
+  `text`
+ADD
+  PRIMARY KEY (`id`),
+ADD
+  KEY `id_story` (`id_story`);
 
-ALTER TABLE `text`
-  ADD PRIMARY KEY (`id`),
-  ADD KEY `id_story` (`id_story`);
-
-ALTER TABLE `text`
+ALTER TABLE
+  `text`
 ADD
   CONSTRAINT `text_ibfk_1` FOREIGN KEY (`id_story`) REFERENCES `story` (`id`);
 
-ALTER TABLE `text`
-DROP FOREIGN KEY `text_ibfk_1`;
-
-ALTER TABLE `text`
-ADD CONSTRAINT `text_ibfk_1` FOREIGN KEY (`id_story`) REFERENCES `story` (`id`) ON DELETE CASCADE;
-
-ALTER TABLE `text`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=36;
-----------------------------------------------
+ALTER TABLE
+  `text`
+MODIFY
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  AUTO_INCREMENT = 36;
