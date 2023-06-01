@@ -309,7 +309,7 @@ foreach ($videoFetch as $video) {
                     actualPlayer = ytPlayer;
                     break;
                 }
-                actualPlayerTime -= getYTPlayerDuration(allPlayers[i]);
+                actualPlayerTime -= getYTPlayerDuration(ytPlayer);
             }
         }
 
