@@ -302,38 +302,38 @@ $imagesFetch = $image->fetchAll(PDO::FETCH_ASSOC);
         if (actualPlayer.tagName == "VIDEO") {
             actualPlayer.currentTime = actualPlayerTime;
             actualPlayer.style.display = "inline";
-            actualPlayer.style.width = "640px";
-            actualPlayer.style.height = "360px";
+            actualPlayer.style.width = "100%";
+            actualPlayer.style.height = "100%";
             actualPlayer.parentElement.style.display = "inline";
-            actualPlayer.parentElement.style.width = "640px";
-            actualPlayer.parentElement.style.height = "360px";
+            actualPlayer.parentElement.style.width = "100%";
+            actualPlayer.parentElement.style.height = "100%";
             actualPlayer.play();
         } else if (actualPlayer.tagName == "AUDIO") {
             actualPlayer.currentTime = actualPlayerTime;
             actualPlayer.style.display = "inline";
-            actualPlayer.style.width = "640px";
+            actualPlayer.style.width = "100%";
             actualPlayer.style.height = "100px";
             actualPlayer.parentElement.style.display = "inline";
-            actualPlayer.parentElement.style.width = "640px";
+            actualPlayer.parentElement.style.width = "100%";
             actualPlayer.parentElement.style.height = "100px";
             actualPlayer.play();
         } else if(actualPlayer.tagName == "IMG"){
             actualPlayer.currentTime = actualPlayerTime;
             actualPlayer.style.display = "inline";
-            actualPlayer.style.width = "640px";
-            actualPlayer.style.height = "360px";
+            actualPlayer.style.width = "100%";
+            actualPlayer.style.height = "100%";
             actualPlayer.parentElement.style.display = "inline";
-            actualPlayer.parentElement.style.width = "640px";
-            actualPlayer.parentElement.style.height = "360px";
+            actualPlayer.parentElement.style.width = "100%";
+            actualPlayer.parentElement.style.height = "100%";
             queueManager(actualPlayer)
         }else {
             actualPlayer.loadVideoByUrl(iframe.getAttribute("src"), actualPlayerTime, 'large');
             actualPlayer.g.style.display = "inline";
-            actualPlayer.g.style.width = "640px";
-            actualPlayer.g.style.height = "360px";
+            actualPlayer.g.style.width = "100%";
+            actualPlayer.g.style.height = "100%";
             actualPlayer.g.parentElement.style.display = "inline";
-            actualPlayer.g.parentElement.style.width = "640px";
-            actualPlayer.g.parentElement.style.height = "360px";
+            actualPlayer.g.parentElement.style.width = "100%";
+            actualPlayer.g.parentElement.style.height = "100%";
         }
     }
 
@@ -450,27 +450,27 @@ $imagesFetch = $image->fetchAll(PDO::FETCH_ASSOC);
         //queue.push(allPlayers[adjacentPlayerIndex]);
         if (allPlayers[adjacentPlayerIndex].tagName == "VIDEO") {
             allPlayers[adjacentPlayerIndex].style.display = "inline";
-            allPlayers[adjacentPlayerIndex].style.width = "640px";
-            allPlayers[adjacentPlayerIndex].style.height = "360px";
+            allPlayers[adjacentPlayerIndex].style.width = "100%";
+            allPlayers[adjacentPlayerIndex].style.height = "100%";
             allPlayers[adjacentPlayerIndex].parentElement.style.display = "inline";
-            allPlayers[adjacentPlayerIndex].parentElement.style.width = "640px";
-            allPlayers[adjacentPlayerIndex].parentElement.style.height = "360px";
+            allPlayers[adjacentPlayerIndex].parentElement.style.width = "100%";
+            allPlayers[adjacentPlayerIndex].parentElement.style.height = "100%";
             allPlayers[adjacentPlayerIndex].play();
         } else if (allPlayers[adjacentPlayerIndex].tagName == "AUDIO") {
             allPlayers[adjacentPlayerIndex].style.display = "inline";
-            allPlayers[adjacentPlayerIndex].style.width = "640px";
+            allPlayers[adjacentPlayerIndex].style.width = "100%";
             allPlayers[adjacentPlayerIndex].style.height = "100px";
             allPlayers[adjacentPlayerIndex].parentElement.style.display = "inline";
-            allPlayers[adjacentPlayerIndex].parentElement.style.width = "640px";
+            allPlayers[adjacentPlayerIndex].parentElement.style.width = "100%";
             allPlayers[adjacentPlayerIndex].parentElement.style.height = "100px";
             allPlayers[adjacentPlayerIndex].play();
         } else if (allPlayers[adjacentPlayerIndex].tagName == "IMG"){
             allPlayers[adjacentPlayerIndex].style.display = "inline";
-            allPlayers[adjacentPlayerIndex].style.width = "640px";
-            allPlayers[adjacentPlayerIndex].style.height = "360px";
+            allPlayers[adjacentPlayerIndex].style.width = "100%";
+            allPlayers[adjacentPlayerIndex].style.height = "100%";
             allPlayers[adjacentPlayerIndex].parentElement.style.display = "inline";
-            allPlayers[adjacentPlayerIndex].parentElement.style.width = "640px";
-            allPlayers[adjacentPlayerIndex].parentElement.style.height = "360px";
+            allPlayers[adjacentPlayerIndex].parentElement.style.width = "100%";
+            allPlayers[adjacentPlayerIndex].parentElement.style.height = "100%";
             queueManager(allPlayers[adjacentPlayerIndex]);
         }
         else {
@@ -478,11 +478,11 @@ $imagesFetch = $image->fetchAll(PDO::FETCH_ASSOC);
             for (j = 0; j < player.length; j++) {
                 if (player[j].g == allPlayers[adjacentPlayerIndex]) {
                     allPlayers[adjacentPlayerIndex].style.display = "inline";
-                    allPlayers[adjacentPlayerIndex].style.width = "640px";
-                    allPlayers[adjacentPlayerIndex].style.height = "360px";
+                    allPlayers[adjacentPlayerIndex].style.width = "100%";
+                    allPlayers[adjacentPlayerIndex].style.height = "100%";
                     allPlayers[adjacentPlayerIndex].parentElement.style.display = "inline";
-                    allPlayers[adjacentPlayerIndex].parentElement.style.width = "640px";
-                    allPlayers[adjacentPlayerIndex].parentElement.style.height = "360px";
+                    allPlayers[adjacentPlayerIndex].parentElement.style.width = "100%";
+                    allPlayers[adjacentPlayerIndex].parentElement.style.height = "100%";
                     player[j].playVideo();
                     break;
                 }
