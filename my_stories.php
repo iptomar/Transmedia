@@ -37,7 +37,11 @@ $stories = $stmt->fetchAll(PDO::FETCH_DEFAULT);
                             </div>
                         </div>
                         <a class="text-reset text-decoration-none w-100" href="selectedStoryPage.php?id=<?= $story['id'] ?>">
-                            <img src="100x100_logo.png" class="img-fluid img-thumbnail w-100" />
+                            <img src="<?php
+                                        $stmt = $pdo->prepare('SELECT image FROM image where storyID = ? ORDER BY storyOrder LIMIT 1');
+                                        $stmt->execute([$story['id']]);
+                                        $stmt->rowCount() > 0 ? $img = "./files/story_" . $story['id'] . "/image/" . $stmt->fetch()['image'] : $img = "default_image.png";
+                                        echo  $img; ?>" class="img-responsive img-fluid img-thumbnail w-100" style="height:250px" />
                             <p class="w-100 p-1 pl-2 pr-2">
                                 <?php echo $story['name'] ?>
                             </p>
