@@ -21,32 +21,31 @@ $stories = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
 <body>
     <?php
-        $currPage = 'index';
-        include "NavBar.php";
-        $index = 'index';
+    $currPage = 'index';
+    include "NavBar.php";
+    $index = 'index';
     ?>
     <div class="d-inline-block mb-5" style="max-width: 940px">
-        <?php for ($i = 0; $i < count($stories); $i++) {
-
-        ?>
+        <?php foreach ($stories as $story) : ?>
             <div class="d-inline-block text-truncate" style="max-width: 300px; margin: 5px;">
-                <a href="selectedStoryPage.php?id=<?=$stories[$i]['id'] ?>">
-                    <img src="100x100_logo.png" class="img-fluid img-thumbnail" style="max-width: 300px;" />
+                <a class="text-reset text-decoration-none w-100" href="selectedStoryPage.php?id=<?= $story['id'] ?>">
+                    <img src="<?php
+                                $stmt = $pdo->prepare('SELECT image FROM image where storyID = ? ORDER BY storyOrder LIMIT 1');
+                                $stmt->execute([$story['id']]);
+                                $stmt->rowCount() > 0 ? $img = "./files/story_" . $story['id'] . "/image/" . $stmt->fetch()['image'] : $img = "default_image.png";
+                                echo  $img; ?>" class="img-responsive img-fluid img-thumbnail w-100" style="height:250px" />
                 </a>
                 <br>
                 <span class="d-inline-block text-truncate" style="max-width: 300px; ">
-                    <?php print_r($stories[$i]['name']) ?>
+                    <?php print_r($story['name']) ?>
                 </span>
             </div>
 
-        <?php
+        <?php endforeach; ?>
 
-        }
-
-        ?>
     </div>
     <?php
-        include "footer.php";
+    include "footer.php";
     ?>
 </body>
 
