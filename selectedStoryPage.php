@@ -4,7 +4,7 @@ include "./functions/useful.php";
 
 $story = $pdo->prepare('SELECT story.name,story.description,story.author, story.id FROM story WHERE story.id = ?');
 $video = $pdo->prepare('SELECT video.link,video.storyId,video.videoType,video.storyOrder,video.duration FROM video WHERE video.storyId = ? ORDER BY video.storyOrder');
-$audio = $pdo->prepare('SELECT audio.id,audio.id_story,audio.audio,audio.storyOrder FROM audio WHERE audio.id_story = ? ORDER BY audio.storyOrder');
+$audio = $pdo->prepare('SELECT audio.id,audio.id_story,audio.audio,audio.storyOrder,duration FROM audio WHERE audio.id_story = ? ORDER BY audio.storyOrder');
 $image = $pdo->prepare('SELECT id,storyID,image,duration,storyOrder FROM image WHERE storyID = ? ORDER BY storyOrder');
 
 $story->execute([$_GET['id']]);
@@ -16,6 +16,9 @@ $videoFetch = $video->fetchAll(PDO::FETCH_ASSOC);
 $audioFetch = $audio->fetchAll(PDO::FETCH_ASSOC);
 $imagesFetch = $image->fetchAll(PDO::FETCH_ASSOC);
 
+$totaltimeVideo = array_sum(array_column($videoFetch, 'duration'));
+$totaltimeAudio = array_sum(array_column($audioFetch, 'duration'));
+$totaltimeImage = array_sum(array_column($imagesFetch, 'duration'));
 ?>
 
 <!DOCTYPE html>
@@ -74,16 +77,16 @@ $imagesFetch = $image->fetchAll(PDO::FETCH_ASSOC);
                         <?php
 
                         if (isset($videoFetch) && !empty($videoFetch)) {
-                            echo '<input style="cursor: pointer;" class="bg-primary text-white media-button rounded border-0 m-2 p-2" type="submit" name="mediaOpt" value="video"/>';
+                            echo '<input style="display: none; cursor: pointer;" id="videobtn" class="bg-primary text-white media-button rounded border-0 m-2 p-2" type="submit" name="mediaOpt" value="video"/>';
                         }
                         if (isset($audioFetch) && !empty($audioFetch)) {
-                            echo '<input style="cursor: pointer;" class="bg-primary text-white media-button rounded border-0 m-2 p-2" type="submit" name="mediaOpt" value="audio"/>';
+                            echo '<input style="display: none; cursor: pointer;" id="audiobtn" class="bg-primary text-white media-button rounded border-0 m-2 p-2" type="submit" name="mediaOpt" value="audio"/>';
                         }
                         if (isset($imagesFetch) && !empty($imagesFetch)) {
-                            echo '<input style="cursor: pointer;" class="bg-primary text-white media-button rounded border-0 m-2 p-2" type="submit" name="mediaOpt" value="images"/>';
+                            echo '<input style="display: none; cursor: pointer;" id="imagebtn" class="bg-primary text-white media-button rounded border-0 m-2 p-2" type="submit" name="mediaOpt" value="images"/>';
                         }
                         if (isset($textFetch) && !empty($textFetch)) {
-                            echo '<input style="cursor: pointer;" class="bg-primary text-white media-button rounded border-0 m-2 p-2" type="submit" name="mediaOpt" value="text"/>';
+                            echo '<input style="display: none; cursor: pointer;" id="textbtn" class="bg-primary text-white media-button rounded border-0 m-2 p-2" type="submit" name="mediaOpt" value="text"/>';
                         }
 
                         ?>
@@ -239,6 +242,24 @@ $imagesFetch = $image->fetchAll(PDO::FETCH_ASSOC);
                 }
             }
         }
+
+        if (cumulativeTime >= <?= $totaltimeVideo ?>) {
+            document.getElementById('videobtn').style.display = "none";
+        } else {
+            document.getElementById('videobtn').style.display = "inline-block";
+        }
+
+        if (cumulativeTime >= <?= $totaltimeAudio ?>) {
+            document.getElementById('audiobtn').style.display = "none";
+        } else {
+            document.getElementById('audiobtn').style.display = "inline-block";
+        }
+        if (cumulativeTime >= <?= $totaltimeImage ?>) {
+            document.getElementById('imagebtn').style.display = "none";
+        } else {
+            document.getElementById('imagebtn').style.display = "inline-block";
+        }
+
         return cumulativeTime;
     }
 
@@ -511,6 +532,9 @@ $imagesFetch = $image->fetchAll(PDO::FETCH_ASSOC);
 
     //function to manage the queue for video media type
     function queueManager(Player) {
+        //Check the totalElapsedTime every second to verify if buttons need to be hidden
+        setInterval(getTotalElapsedStoryTime, 1000);
+
         //only push into queue when the video player
         //doesn't exist alerady in the queue
         if (!queue.includes(Player)) {
@@ -533,15 +557,14 @@ $imagesFetch = $image->fetchAll(PDO::FETCH_ASSOC);
                 lastPlay.parentElement.style.display = "none";
                 lastPlay.parentElement.style.width = 0;
                 lastPlay.parentElement.style.height = 0;
-            } else if (lastPlay.tagName == "IMG"){
+            } else if (lastPlay.tagName == "IMG") {
                 lastPlay.style.display = "none";
                 lastPlay.parentElement.style.width = 0;
                 lastPlay.parentElement.style.height = 0;
                 lastPlay.parentElement.style.display = "none";
                 lastPlay.parentElement.style.width = 0;
                 lastPlay.parentElement.style.height = 0;
-            }
-            else {
+            } else {
                 //console.log(lastPlay)
                 lastPlay.stopVideo();
                 lastPlay.g.style.display = "none";
