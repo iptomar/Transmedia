@@ -116,7 +116,7 @@ $totaltimeImage = array_sum(array_column($imagesFetch, 'duration'));
                                 for ($i = 0; $i < count($videoFetch); $i++) {
                                     echo '<div style="width:0px; height:0px; display: none;" id="preview' . $i . '" class="video-preview embed-responsive embed-responsive-16by9 d-inline-block rounded">';
                                     if ($videoFetch[$i]["videoType"] == "file") {
-                                        echo '<video style="display: none;" id="player' . $i . '" onended="playAdjacentPlayer(\'right\')" class ="video-audio player video-class embed-responsive-item" controls src="./files/story_' . $videoFetch[$i]["storyId"] . '/video/' . $videoFetch[$i]["link"] . '"></video>';
+                                        echo '<video style="display: none;" id="player' . $i . '" onplay="queueManager(this)" onended="playAdjacentPlayer(\'right\')" class ="video-audio player video-class embed-responsive-item" controls src="./files/story_' . $videoFetch[$i]["storyId"] . '/video/' . $videoFetch[$i]["link"] . '"></video>';
                                     } elseif ($videoFetch[$i]["videoType"] == "text") {
                                         echo '<iframe style="display: none;" id="player' . $i . '" class ="player video-class embed-responsive-item" type="text/html" src="https://www.youtube.com/embed/' . $videoFetch[$i]["link"] . '?enablejsapi=1" allowfullscreen="true" allow="autoplay" allowscriptaccess="always"></iframe>'; //add iframe with src pointing to the video with this code
                                     }
@@ -128,7 +128,7 @@ $totaltimeImage = array_sum(array_column($imagesFetch, 'duration'));
 
                                 for ($i = 0; $i < count($audioFetch); $i++) {
                                     echo '<div style="width:0px; height:0px; display: none;" id="preview' . $i . '" class="audio-preview">';
-                                    echo '<audio style="display: none;" class=" video-audio player audio-class"  onended="playAdjacentPlayer(\'right\')" controls id="audio-player-' . $i . '" src="./files/story_' . $audioFetch[$i]["id_story"] . '/audio/' . $audioFetch[$i]["audio"] . '"></audio>';
+                                    echo '<audio style="display: none;" class=" video-audio player audio-class" onplay="queueManager(this)" onended="playAdjacentPlayer(\'right\')" controls id="audio-player-' . $i . '" src="./files/story_' . $audioFetch[$i]["id_story"] . '/audio/' . $audioFetch[$i]["audio"] . '"></audio>';
                                     echo '</div>';
                                 }
                                 break;
@@ -331,6 +331,7 @@ $totaltimeImage = array_sum(array_column($imagesFetch, 'duration'));
             }
         }
         buttonsCalculate(getPlayerIndex(actualPlayer))
+        queueManager(actualPlayer);
 
         if (actualPlayer.tagName == "VIDEO") {
             actualPlayer.currentTime = actualPlayerTime;
@@ -341,7 +342,6 @@ $totaltimeImage = array_sum(array_column($imagesFetch, 'duration'));
             actualPlayer.parentElement.style.width = "100%";
             actualPlayer.parentElement.style.height = "100%";
             actualPlayer.play();
-            queueManager(actualPlayer);
         } else if (actualPlayer.tagName == "AUDIO") {
             actualPlayer.currentTime = actualPlayerTime;
             actualPlayer.style.display = "inline";
@@ -350,7 +350,7 @@ $totaltimeImage = array_sum(array_column($imagesFetch, 'duration'));
             actualPlayer.parentElement.style.display = "inline";
             actualPlayer.parentElement.style.width = "100%";
             actualPlayer.parentElement.style.height = "100px";
-            queueManager(actualPlayer);
+            actualPlayer.play();
         } else if (actualPlayer.tagName == "IMG") {
             actualPlayer.currentTime = actualPlayerTime;
             actualPlayer.style.display = "inline";
@@ -368,7 +368,6 @@ $totaltimeImage = array_sum(array_column($imagesFetch, 'duration'));
             actualPlayer.g.parentElement.style.display = "inline";
             actualPlayer.g.parentElement.style.width = "100%";
             actualPlayer.g.parentElement.style.height = "100%";
-            queueManager(actualPlayer);
         }
     }
 
@@ -493,7 +492,6 @@ $totaltimeImage = array_sum(array_column($imagesFetch, 'duration'));
             allPlayers[adjacentPlayerIndex].parentElement.style.width = "100%";
             allPlayers[adjacentPlayerIndex].parentElement.style.height = "100%";
             allPlayers[adjacentPlayerIndex].play();
-            queueManager(allPlayers[adjacentPlayerIndex]);
         } else if (allPlayers[adjacentPlayerIndex].tagName == "AUDIO") {
             allPlayers[adjacentPlayerIndex].style.display = "inline";
             allPlayers[adjacentPlayerIndex].style.width = "100%";
@@ -502,7 +500,6 @@ $totaltimeImage = array_sum(array_column($imagesFetch, 'duration'));
             allPlayers[adjacentPlayerIndex].parentElement.style.width = "100%";
             allPlayers[adjacentPlayerIndex].parentElement.style.height = "100px";
             allPlayers[adjacentPlayerIndex].play();
-            queueManager(allPlayers[adjacentPlayerIndex]);
         } else if (allPlayers[adjacentPlayerIndex].tagName == "IMG") {
             allPlayers[adjacentPlayerIndex].style.display = "inline";
             allPlayers[adjacentPlayerIndex].style.width = "100%";
@@ -555,7 +552,7 @@ $totaltimeImage = array_sum(array_column($imagesFetch, 'duration'));
 
         //only push into queue when the video player
         //doesn't exist alerady in the queue
-        if (!queue.includes(Player) && Player !== undefined) {
+        if (!queue.includes(Player)) {
             queue.push(Player);
         }
 
@@ -584,7 +581,7 @@ $totaltimeImage = array_sum(array_column($imagesFetch, 'duration'));
                 lastPlay.parentElement.style.height = 0;
             } else {
                 //console.log(lastPlay)
-                lastPlay.stopVideo();
+                lastPlay.pauseVideo();
                 lastPlay.g.style.display = "none";
                 lastPlay.g.parentElement.style.width = 0;
                 lastPlay.g.parentElement.style.height = 0;
