@@ -31,8 +31,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         //If the user clicked a button that edits, or deletes, a video insert the edit_video file
         require("edit_video.php");
     } else if (isset($_POST['orderdownAudio']) || isset($_POST['orderupAudio']) || isset($_POST['deleteAudio'])) {
-        //If the user clicked a button that edits, or deletes, a audio  the edit_audio file
+        //If the user clicked a button that edits, or deletes, a audio insert the edit_audio file
         require("edit_audio.php");
+    } else if (isset($_POST['orderdownImage']) || isset($_POST['orderupImage']) || isset($_POST['deleteImage'])) {
+        //If the user clicked a button that edits, or deletes, a image insert the edit_image file
+        require("edit_image.php");
     }
 }
 
@@ -54,10 +57,15 @@ $sql_videos = $pdo->prepare('SELECT id, link, storyId, videoType, storyOrder,dur
 $sql_videos->execute([$_GET['id']]);
 $videos = $sql_videos->fetchAll(PDO::FETCH_ASSOC);
 
-// Fetch the story videos
+// Fetch the story audio
 $sql_audios = $pdo->prepare('SELECT id, id_story, audio, storyOrder,duration FROM audio WHERE id_story = ? ORDER BY storyOrder;');
 $sql_audios->execute([$_GET['id']]);
 $audios = $sql_audios->fetchAll(PDO::FETCH_ASSOC);
+
+// Fetch the story image
+$sql_image = $pdo->prepare('SELECT id, image, storyId, storyOrder,duration FROM image WHERE storyId = ? ORDER BY storyOrder;');
+$sql_image->execute([$_GET['id']]);
+$images = $sql_image->fetchAll(PDO::FETCH_ASSOC);
 
 // Calculate total duration of all videos
 $total_duration = 0;
@@ -68,10 +76,16 @@ $audios_duration = 0;
 foreach ($audios as $audio) {
     $audios_duration += $audio['duration'];
 }
+$images_duration = 0;
+foreach ($images as $image) {
+    $images_duration += $image['duration'];
+}
 
 //Use the larger duration as the total duration
 if ($audios_duration > $total_duration) {
     $total_duration = $audios_duration;
+} else if ($images_duration > $total_duration) {
+    $total_duration = $images_duration;
 }
 ?>
 <!DOCTYPE html>
@@ -115,6 +129,16 @@ if ($audios_duration > $total_duration) {
             <div class="modal-content">
                 <div class="modal-body">
                     <?php include "addImageToStory.php"; ?>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="changeImgDuration" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-body">
+                    <?php include "edit_image_duration.php"; ?>
 
                 </div>
             </div>
@@ -197,7 +221,7 @@ if ($audios_duration > $total_duration) {
                                 $i = 0;
                                 foreach ($videos as $video) {
 
-                                    echo "<div class='video-container' data-duration='" . $video["duration"] . "'>";
+                                    echo "<div class='media-container video-container' data-duration='" . $video["duration"] . "'>";
                                     echo '<div class="media-buttons p-0">
                                             <div class="row p-0 m-0">';
                                     if ($i != 0)
@@ -233,7 +257,7 @@ if ($audios_duration > $total_duration) {
                                 $numItems = count($audios);
                                 $i = 0;
                                 foreach ($audios as $audio) {
-                                    echo "<div class='audio-container' data-duration='" . $audio["duration"] . "'>";
+                                    echo "<div class='media-container audio-container' data-duration='" . $audio["duration"] . "'>";
                                     echo '<div class="media-buttons p-0">
                                             <div class="row p-0 m-0">';
                                     if ($i != 0)
@@ -257,6 +281,37 @@ if ($audios_duration > $total_duration) {
                             </div>
                             <div class="mt-1 duration-line"></div>
 
+                            <div class="medias-wrapper mt-3">
+                                <p class="d-flex align-items-center justify-content-center rotated" style="color:white; margin: auto 1px;">Images</p>
+                                <?php
+                                $time = 0;
+                                $numItems = count($images);
+                                $i = 0;
+                                foreach ($images as $image) {
+                                    echo "<div class='media-container image-container' data-duration='" . $image["duration"] . "'>";
+                                    echo '<div class="media-buttons p-0">
+                                            <div class="row p-0 m-0">';
+                                    if ($i != 0)
+                                        echo    '<div class="col p-0">
+                                                    <button type="submit" name="orderdownImage" value="' . $image["id"] . '" class="w-100 btn-primary"><</button>
+                                                </div>';
+                                    echo        '<div class="col  p-0">
+                                                    <button type="submit" onclick="confirmDelete()" id="deleteImage" name="deleteImage" value="' . $image["id"] . '" class="w-100  btn-danger">X</button>
+                                                </div>';
+                                    if ($i < $numItems - 1)
+                                        echo    '<div class="col  p-0">
+                                                    <button type="submit" name="orderupImage" value="' . $image["id"] . '" class="w-100 btn-primary">></button> 
+                                                </div>';
+                                    echo    '</div>
+                                        </div>';
+                                    echo '<div class="img-div" ><img style="height:100px; width: auto; max-width:100%" src="./files/story_' . $image["storyId"] . '/image/' . $image["image"] . '"></img></div>';
+                                    echo '<button  type="button" class="btn-primary w-100" data-toggle="modal" data-target="#changeImgDuration" data-duration="'. $image["duration"].'"  data-image="'. $image["id"].'" class="w-100  btn-primary">🕑</button>';
+                                    echo '<span class="duration"></span>';
+                                    echo "</div>";
+                                    $i++;
+                                } ?>
+                            </div>
+                            <div class="mt-1 duration-line"></div>
                         </div>
                 </div>
                 </form>
@@ -273,6 +328,15 @@ if ($audios_duration > $total_duration) {
     ?>
 
     <script>
+        $('#changeImgDuration').on('show.bs.modal', function(event) {
+            console.log("MODAL OPENED")
+            var button = $(event.relatedTarget) 
+            var duration = button.data('duration') 
+            var id = button.data('image') 
+            var modal = $(this)
+            modal.find('.modal-body #duration').val(duration)
+            modal.find('.modal-body #imageID').val(id)
+        })
         // Function prompts the user to confirm the delete before submitting the form
         function confirmDelete() {
             const confirmed = confirm('Are you sure you want to delete this?');
@@ -421,6 +485,20 @@ if ($audios_duration > $total_duration) {
             preview.className = 'w-100 mt-3';
         }
 
+        // Preview an image element
+        function previewImage(image) {
+            // Clone the image element
+            const clonedImage = image.getAttribute("src");
+            // Get the preview element
+            const preview = document.querySelector('#preview');
+            // Clear any existing content in the preview element
+            preview.innerHTML = '';
+            // Add the cloned audio element to the preview element
+            preview.innerHTML = '<img src="' + clonedImage + '"></img>';
+            // Add CSS classes to the preview element
+            preview.className = 'w-100 mt-3';
+        }
+
         // The Youtube Frame API will call this function when the video player is ready.
         function onPreviewVideoReady(event) {
             // Play the video when it is ready
@@ -523,6 +601,39 @@ if ($audios_duration > $total_duration) {
                         const audio = container.querySelector('audio');
                         // Preview the audio when container is clicked
                         previewAudio(audio);
+                    }
+
+                });
+            });
+            setImageContainer();
+        }
+
+        function setImageContainer() {
+            time = 0;
+            // Get all the audio containers in the story
+            const containers = document.querySelectorAll('.medias-wrapper .image-container');
+            // Loop through each container
+            containers.forEach(container => {
+                // Get the duration of the video 
+                var duration = parseInt(container.dataset.duration);
+
+                adjustContainer(container, duration);
+
+                // Add the duration of the current video to the video time passed and format the time element
+                time += duration;
+                const durationElement = container.querySelector('.duration');
+                //Format the time of the video
+                durationElement.textContent = timeFormat(time);
+
+                // Add click event listener to the container
+                container.addEventListener('click', (e) => {
+                    // Don't trigger if button is pressed
+                    if ($(e.target).is("button")) {
+                        return;
+                    } else {
+                        const image = container.querySelector('img');
+                        // Preview the audio when container is clicked
+                        previewImage(image);
                     }
 
                 });
