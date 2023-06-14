@@ -35,7 +35,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['add_image'])) {
     if (!$fileType == "image") {
         alert("ERROR file is not a valid image");
         reload_page();
-    }        
+    }
     //Generate a new name for the image
     $image = generate_file_name("image_", "image");
     if (!save_file("./files/story_$storyID/image/", $image, "image")) {
@@ -76,7 +76,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['add_image'])) {
             <div class="card-body">
                 <form method="post" id="form-image" enctype="multipart/form-data">
                     <input type="hidden" id="storyID" name="id" value="<?= isset($_GET['id']) ?  $_GET['id'] : "" ?>" />
-                    <div id="previewimage"></div>
+                    <div id="previewimage" style="text-align: center;"></div>
 
                     <div class="form-group">
                         <label for="image">Choose image:</label>
@@ -93,25 +93,25 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['add_image'])) {
     </div>
     <script>
         //When the input used to select the video is changed
-        $("#imageFile").on("change", function(evt) {
-            var input = document.getElementById('imageFile');
-            var fileType = this.files[0]["type"];
+        $("#image").on("change", function(evt) {
             $("#previewimage").html('')
-            document.getElementById("durationimage").setAttribute('value', "");
-
+            console.log("TEST NOT " + event.target.result);
+            var input = document.getElementById('image');
+            var file = this.files[0];
+            var fileType = file["type"];
             if (fileType.split('/')[0] === 'image') {
                 input.setCustomValidity("");
-                $("#previewimage").html('<img class="w-100 mb-3 mt-3 image" id="imagefile"></image>');
-                var fileInput = document.getElementById('imageFile');
-                var fileUrl = window.URL.createObjectURL(fileInput.files[0]);
-                $(".image").attr("src", fileUrl);
+                $("#previewimage").html('<img class="mb-3 mt-3 image" style="max-height:200px; width: auto;  margin:auto;" id="imgPreview"></img>');
+                let reader = new FileReader();
+                reader.onload = function(event) {
+                    $('#imgPreview').attr('src', event.target.result);
+                }
+                reader.readAsDataURL(file);
             } else {
                 //If the text is not a valid video file then do not allow submission of the form
                 input.setCustomValidity("File is not a valid image");
             }
         });
-
-
     </script>
 </body>
 

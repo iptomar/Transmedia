@@ -15,6 +15,7 @@ $stories = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
 
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['add_text'])) {
+
     
     //Get story id, duration, text, author
     $storyID = $_POST['id'];
@@ -38,6 +39,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['add_text'])) {
     } catch (Exception $e) {
         echo '<script>alert("ERROR occured while connecting to the database")</script>';
     }
+
 }
 
 
