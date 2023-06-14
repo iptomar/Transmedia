@@ -161,6 +161,11 @@ $totaltimeImage = array_sum(array_column($imagesFetch, 'duration'));
 
         </div>
     </div>
+
+    <?php
+        include "footer.php";
+    ?>
+
 </body>
 
 <script>
