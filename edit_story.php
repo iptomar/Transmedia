@@ -125,7 +125,7 @@ if ($audios_duration > $total_duration) {
         <div class="modal-dialog" role="document">
             <div class="modal-content">
                 <div class="modal-body">
-                    <!--<?php include "addTextToStory.php"; ?>-->
+                    <?php include "addTextToStory.php"; ?>
 
                 </div>
             </div>
