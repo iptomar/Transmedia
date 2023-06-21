@@ -6,19 +6,24 @@ $story = $pdo->prepare('SELECT story.name,story.description,story.author, story.
 $video = $pdo->prepare('SELECT video.link,video.storyId,video.videoType,video.storyOrder,video.duration FROM video WHERE video.storyId = ? ORDER BY video.storyOrder');
 $audio = $pdo->prepare('SELECT audio.id,audio.id_story,audio.audio,audio.storyOrder,duration FROM audio WHERE audio.id_story = ? ORDER BY audio.storyOrder');
 $image = $pdo->prepare('SELECT id,storyID,image,duration,storyOrder FROM image WHERE storyID = ? ORDER BY storyOrder');
+$text = $pdo->prepare('SELECT id,id_story,text,duration,storyOrder FROM text WHERE id_story = ? ORDER BY storyOrder');
 
 $story->execute([$_GET['id']]);
 $video->execute([$_GET['id']]);
 $audio->execute([$_GET['id']]);
 $image->execute([$_GET['id']]);
+$text->execute([$_GET['id']]);
+
 $storyFetch = $story->fetch(PDO::FETCH_ASSOC);
 $videoFetch = $video->fetchAll(PDO::FETCH_ASSOC);
 $audioFetch = $audio->fetchAll(PDO::FETCH_ASSOC);
 $imagesFetch = $image->fetchAll(PDO::FETCH_ASSOC);
+$textFetch = $text->fetchAll(PDO::FETCH_ASSOC);
 
 $totaltimeVideo = array_sum(array_column($videoFetch, 'duration'));
 $totaltimeAudio = array_sum(array_column($audioFetch, 'duration'));
 $totaltimeImage = array_sum(array_column($imagesFetch, 'duration'));
+$totaltimeText = array_sum(array_column($textFetch, 'duration'));
 ?>
 
 <!DOCTYPE html>
@@ -107,7 +112,7 @@ $totaltimeImage = array_sum(array_column($imagesFetch, 'duration'));
 
                     $mediaOpt = $_SESSION["mediaOpt"];
 
-                    if (count($videoFetch) + count($audioFetch) + count($imagesFetch) == 0) {
+                    if (count($videoFetch) + count($audioFetch) + count($imagesFetch)  + count($textFetch) == 0) {
                         echo "<p>Sem conteúdo para apresentar</p>";
                     } else {
                         switch ($mediaOpt) {
@@ -140,7 +145,11 @@ $totaltimeImage = array_sum(array_column($imagesFetch, 'duration'));
                                 }
                                 break;
                             case "text":
-                                echo "Yet To Be Implemented";
+                                foreach ($textFetch as $text) {
+                                    echo '<div style="width:0px; height:0px; display: none;">';
+                                    echo '<p style="display: none;" class="mb-3 text-class player" data-duration="' . $text['duration'] . '" id="text-' . $text['id'] . '">' . $text["text"] . '</p>';
+                                    echo '</div>';
+                                }
                                 break;
                         }
 
@@ -162,7 +171,7 @@ $totaltimeImage = array_sum(array_column($imagesFetch, 'duration'));
     </div>
 
     <?php
-        include "footer.php";
+    include "footer.php";
     ?>
 
 </body>
@@ -175,6 +184,7 @@ $totaltimeImage = array_sum(array_column($imagesFetch, 'duration'));
     var videoBtn;
     var audioBtn;
     var imgBtn;
+    var textBtn;
     //total story time
     var totalStoryElapsedTime = 0;
 
@@ -193,6 +203,7 @@ $totaltimeImage = array_sum(array_column($imagesFetch, 'duration'));
         videoBtn = document.getElementById('videobtn');
         audioBtn = document.getElementById('audiobtn');
         imgBtn = document.getElementById('imagebtn');
+        textBtn = document.getElementById('textbtn');
         prevBtn = document.getElementById("prevMediaButton");
         nextBtn = document.getElementById("nextMediaButton");
 
@@ -230,7 +241,7 @@ $totaltimeImage = array_sum(array_column($imagesFetch, 'duration'));
         queue.push(actualPlayer);
         //actions to take if the actual player is
         //of a tag=<video> video or tag=<audio>
-        if (actualPlayer.tagName == "VIDEO" || actualPlayer.tagName == "AUDIO" || actualPlayer.tagName == "IMG") {
+        if (actualPlayer.tagName == "VIDEO" || actualPlayer.tagName == "AUDIO" || actualPlayer.tagName == "IMG" || actualPlayer.tagName == "P") {
             //get the story order of the actual video or audio
             var actualPlayerIndex = Array.prototype.slice.call(allPlayers).indexOf(actualPlayer);
             cumulativeTime += getPlayerCurrentTime(actualPlayer);
@@ -244,7 +255,7 @@ $totaltimeImage = array_sum(array_column($imagesFetch, 'duration'));
         //except it was used the total duration funtion for 
         //each video type
         for (i = actualPlayerIndex - 1; i >= 0; i--) {
-            if (allPlayers[i].tagName == "VIDEO" || allPlayers[i].tagName == "AUDIO" || actualPlayer.tagName == "IMG") {
+            if (allPlayers[i].tagName == "VIDEO" || allPlayers[i].tagName == "AUDIO" || actualPlayer.tagName == "IMG" || actualPlayer.tagName == "P") {
                 cumulativeTime += getPlayerDuration(allPlayers[i]);
             } else {
                 for (j = 0; j < player.length; j++) {
@@ -275,6 +286,13 @@ $totaltimeImage = array_sum(array_column($imagesFetch, 'duration'));
                 imgBtn.style.display = "none";
             } else {
                 imgBtn.style.display = "inline-block";
+            }
+        }
+        if (textBtn != null) {
+            if (cumulativeTime >= <?= $totaltimeText ?>) {
+                textBtn.style.display = "none";
+            } else {
+                textBtn.style.display = "inline-block";
             }
         }
         return cumulativeTime;
@@ -312,7 +330,7 @@ $totaltimeImage = array_sum(array_column($imagesFetch, 'duration'));
 
 
         for (i = 0; i < allPlayers.length; i++) {
-            if (allPlayers[i].tagName == "VIDEO" || allPlayers[i].tagName == "AUDIO" || allPlayers[i].tagName == "IMG") {
+            if (allPlayers[i].tagName == "VIDEO" || allPlayers[i].tagName == "AUDIO" || allPlayers[i].tagName == "IMG" || allPlayers[i].tagName == "P") {
                 if (getPlayerDuration(allPlayers[i]) > actualPlayerTime) {
                     actualPlayer = allPlayers[i];
                     actualPlayer.dataset.current = actualPlayerTime;
@@ -356,7 +374,7 @@ $totaltimeImage = array_sum(array_column($imagesFetch, 'duration'));
             actualPlayer.parentElement.style.width = "100%";
             actualPlayer.parentElement.style.height = "100px";
             actualPlayer.play();
-        } else if (actualPlayer.tagName == "IMG") {
+        } else if (actualPlayer.tagName == "IMG" || actualPlayer.tagName == "P") {
             actualPlayer.currentTime = actualPlayerTime;
             actualPlayer.style.display = "inline";
             actualPlayer.style.width = "100%";
@@ -395,7 +413,7 @@ $totaltimeImage = array_sum(array_column($imagesFetch, 'duration'));
             Player.parentElement.style.width = 0;
             Player.parentElement.style.height = 0;
 
-        } else if (Player.tagName == "IMG") {
+        } else if (Player.tagName == "IMG" || Player.tagName == "P") {
             Player.currentTime = 0;
             Player.style.display = "none";
             Player.style.width = 0;
@@ -441,7 +459,7 @@ $totaltimeImage = array_sum(array_column($imagesFetch, 'duration'));
             Player.parentElement.style.width = 0;
             Player.parentElement.style.height = 0;
 
-        } else if (Player.tagName == "IMG") {
+        } else if (Player.tagName == "IMG" || Player.tagName == "P") {
             Player.currentTime = 0;
             Player.style.display = "none";
             Player.style.width = 0;
@@ -505,7 +523,7 @@ $totaltimeImage = array_sum(array_column($imagesFetch, 'duration'));
             allPlayers[adjacentPlayerIndex].parentElement.style.width = "100%";
             allPlayers[adjacentPlayerIndex].parentElement.style.height = "100px";
             allPlayers[adjacentPlayerIndex].play();
-        } else if (allPlayers[adjacentPlayerIndex].tagName == "IMG") {
+        } else if (allPlayers[adjacentPlayerIndex].tagName == "IMG" || allPlayers[adjacentPlayerIndex].tagName == "P") {
             allPlayers[adjacentPlayerIndex].style.display = "inline";
             allPlayers[adjacentPlayerIndex].style.width = "100%";
             allPlayers[adjacentPlayerIndex].style.height = "100%";
@@ -532,7 +550,7 @@ $totaltimeImage = array_sum(array_column($imagesFetch, 'duration'));
 
     //return player (tag <video> or <audio>) time mark position
     function getPlayerCurrentTime(player) {
-        if (player.tagName == "IMG") {
+        if (player.tagName == "IMG" || player.tagName == "P") {
             var currentime = player.dataset.current
             return currentime === undefined ? 0 : Math.round(player.dataset.current);
         } else {
@@ -542,7 +560,7 @@ $totaltimeImage = array_sum(array_column($imagesFetch, 'duration'));
 
     //return player (tag <video> or <audio>) duration
     function getPlayerDuration(player) {
-        if (player.tagName == "IMG") {
+        if (player.tagName == "IMG"|| player.tagName == "P") {
             return Math.round(player.dataset.duration);
         } else {
             return Math.round(player.duration);
@@ -577,7 +595,7 @@ $totaltimeImage = array_sum(array_column($imagesFetch, 'duration'));
                 lastPlay.parentElement.style.display = "none";
                 lastPlay.parentElement.style.width = 0;
                 lastPlay.parentElement.style.height = 0;
-            } else if (lastPlay.tagName == "IMG") {
+            } else if (lastPlay.tagName == "IMG" || lastPlay.tagName == "P") {
                 lastPlay.style.display = "none";
                 lastPlay.parentElement.style.width = 0;
                 lastPlay.parentElement.style.height = 0;
@@ -664,7 +682,7 @@ $totaltimeImage = array_sum(array_column($imagesFetch, 'duration'));
     }
 
     function getPlayerIndex(Player) {
-        if (Player.tagName != "VIDEO" && Player.tagName != "AUDIO" && Player.tagName != "IMG") {
+        if (Player.tagName != "VIDEO" && Player.tagName != "AUDIO" && Player.tagName != "IMG" && Player.tagName != "P") {
             Player = Player.g;
         }
         return Array.prototype.slice.call(allPlayers).indexOf(Player)
