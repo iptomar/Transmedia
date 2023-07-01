@@ -71,8 +71,7 @@ $totaltimeText = array_sum(array_column($textFetch, 'duration'));
                     <label for="author" style="font-size:20px; font-weight: bold;">Author</label>
                     <p>
                         <?php
-                        echo"<a href='user_profile.php?user=".$storyFetch['author']."'>".$storyFetch['author']."</a>";
-
+                        echo "<a href='user_profile.php?user=" . $storyFetch['author'] . "'>" . $storyFetch['author'] . "</a>";
                         ?>
                     </p>
                 </div>
@@ -104,11 +103,19 @@ $totaltimeText = array_sum(array_column($textFetch, 'duration'));
 
                 <div id="mediaDiv" class="mt-3">
                     <?php
-                    //tratamento variavel sessao de opcao de meio
                     if (isset($_POST["mediaOpt"])) {
                         $_SESSION["mediaOpt"] = $_POST["mediaOpt"];
                     } else {
-                        $_SESSION["mediaOpt"] = "video";
+                        // Determine the first available media option
+                        if (count($videoFetch) > 0) {
+                            $_SESSION["mediaOpt"] = "video";
+                        } elseif (count($audioFetch) > 0) {
+                            $_SESSION["mediaOpt"] = "audio";
+                        } elseif (count($imagesFetch) > 0) {
+                            $_SESSION["mediaOpt"] = "images";
+                        } elseif (count($textFetch) > 0) {
+                            $_SESSION["mediaOpt"] = "text";
+                        }
                     }
 
                     $mediaOpt = $_SESSION["mediaOpt"];
@@ -561,7 +568,7 @@ $totaltimeText = array_sum(array_column($textFetch, 'duration'));
 
     //return player (tag <video> or <audio>) duration
     function getPlayerDuration(player) {
-        if (player.tagName == "IMG"|| player.tagName == "P") {
+        if (player.tagName == "IMG" || player.tagName == "P") {
             return Math.round(player.dataset.duration);
         } else {
             return Math.round(player.duration);
