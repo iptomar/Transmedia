@@ -1,7 +1,7 @@
 <?php
 require "config/connectdb.php";
-
-$stmt = $pdo->prepare('SELECT id,name FROM story');
+include "NavBar.php";
+$stmt = $pdo->prepare('SELECT id,name FROM story ORDER BY name');
 $stmt->execute();
 $stories = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
@@ -14,35 +14,43 @@ $stories = $stmt->fetchAll(PDO::FETCH_ASSOC);
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
-    <link rel="stylesheet" href="./style/stories_catalogue.css">
     <title>Stories Catalogue</title>
+    <style>
+        .img-thumbnail {
+            object-fit: contain;
+            max-height: 100%;
+            max-width: 100%;
+        }
+
+        .card-body {
+            padding: 10px 20px !important;
+        }
+    </style>
 </head>
 
 <body>
-    <?php
-    $currPage = 'index';
-    include "NavBar.php";
-    $index = 'index';
-    ?>
-    <div class="d-inline-block mb-5" style="max-width: 940px">
-        <?php foreach ($stories as $story) : ?>
-            <div class="d-inline-block text-truncate" style="max-width: 300px; margin: 5px;">
-                <a class="text-reset text-decoration-none w-100" href="selectedStoryPage.php?id=<?= $story['id'] ?>">
-                    <img src="<?php
-                                $stmt = $pdo->prepare('SELECT image FROM image where storyID = ? ORDER BY storyOrder LIMIT 1');
-                                $stmt->execute([$story['id']]);
-                                $stmt->rowCount() > 0 ? $img = "./files/story_" . $story['id'] . "/image/" . $stmt->fetch()['image'] : $img = "default_image.png";
-                                echo  $img; ?>" class="img-responsive img-fluid img-thumbnail w-100" style="height:250px" />
-                </a>
-                <br>
-                <span class="d-inline-block text-truncate" style="max-width: 300px; ">
-                    <?php print_r($story['name']) ?>
-                </span>
-            </div>
-
-        <?php endforeach; ?>
-
+    <div class="stories m-2 mr-5 ml-5 mt-3">
+        <div class="row m-3">
+            <?php
+            foreach ($stories as $story) : ?>
+                <div class="col-12 col-sm-6 col-md-4 col-lg-3 mb-3">
+                    <div class="card">
+                        <a class="text-reset text-decoration-none" href="selectedStoryPage.php?id=<?= $story['id'] ?>">
+                            <div style="height: 250px; display: flex; align-items: flex-end;">
+                                <img src="<?php
+                                            $stmt = $pdo->prepare('SELECT image FROM image where storyID = ? ORDER BY storyOrder LIMIT 1');
+                                            $stmt->execute([$story['id']]);
+                                            $stmt->rowCount() > 0 ? $img = "./files/story_" . $story['id'] . "/image/" . $stmt->fetch()['image'] : $img = "default_image.png";
+                                            echo $img; ?>" class="w-100 img-thumbnail" alt="Story Image" style="max-height: 100%;">
+                            </div>
+                            <div class="card-body">
+                                <h6 class="card-title m-0"><?php echo $story['name'] ?></h6>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+            <?php endforeach; ?>
+        </div>
     </div>
     <?php
     include "footer.php";

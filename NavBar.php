@@ -24,11 +24,11 @@ if (session_status() === PHP_SESSION_NONE) {
       //Hide links that the user does not have permission to access if they are not logged in
       if (isset($_SESSION["user"])) {
         echo '<li class="nav-item">
-        <a class="nav-link" href="createStory.php">Create Story</a>
-      </li>
-      <li class="nav-item">
-        <a class="nav-link" href="my_stories.php">My Stories</a>
-      </li>';
+          <a class="nav-link" href="my_stories.php">My Stories</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="createStory.php">Create Story</a>
+        </li>';
       } ?>
     </ul>
     <ul class="navbar-nav mt-2 mt-lg-0" style="max-width: 200px;">
