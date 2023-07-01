@@ -17,6 +17,9 @@ if (session_status() === PHP_SESSION_NONE) {
   </button>
   <div class="collapse navbar-collapse" id="navbarTransmedia">
     <ul class="navbar-nav mx-auto mt-2 mt-lg-0 ">
+      <li class="nav-item">
+        <a class="nav-link" href="storiesCatalogue.php">Stories Catalogue</a>
+      </li>
       <?php
       //Hide links that the user does not have permission to access if they are not logged in
       if (isset($_SESSION["user"])) {
@@ -29,27 +32,24 @@ if (session_status() === PHP_SESSION_NONE) {
       } ?>
     </ul>
     <ul class="navbar-nav mt-2 mt-lg-0" style="max-width: 200px;">
-
-    <?php
-    //Verify if user is logged in, if he is instead of login and register button show logout button
-    if (!isset($_SESSION["user"])) {
-      echo "<a class='nav-link signin' href='login.php'>Login</a>";
-      echo "<a class='nav-link register' href='register.php'>Register</a>";
-    } else {
-      echo '
-      <li class="nav-item dropdown">
-      <a class="nav-link dropdown-toggle btn btn-secondary user-dropdow" id="userDropdown" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-        '. $_SESSION["user"].'
-      </a>
-      <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
-        <li><a class="dropdown-item" href="user_edit.php">Edit Profile</a></li>
-        <li><a class="dropdown-item logout" href="logout.php">Logout</a></li>
-      </ul>
-    </li>
-      ';
-    }
-    ?>
-      </ul>
+      <?php
+      //Verify if user is logged in, if he is instead of login and register button show logout button
+      if (!isset($_SESSION["user"])) {
+        echo "<a class='nav-link signin' href='login.php'>Login</a>";
+        echo "<a class='nav-link register' href='register.php'>Register</a>";
+      } else {
+        echo '<li class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle btn btn-secondary user-dropdow" id="userDropdown" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                  ' . $_SESSION["user"] . '
+                </a>
+                <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
+                  <li><a class="dropdown-item" href="user_edit.php">Edit Profile</a></li>
+                  <li><a class="dropdown-item logout" href="logout.php">Logout</a></li>
+                </ul>
+              </li>';
+      }
+      ?>
+    </ul>
   </div>
 </nav>
 
