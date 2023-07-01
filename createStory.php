@@ -34,24 +34,30 @@ if (isset($_POST['submitButton'])) {
     include "NavBar.php";
     $createStory = 'createStory';
     ?>
-<form  method="POST">
-    <!-- Tell the user to insert the Name !-->
-    <div class="form-group">
-        <label for="name">Name</label>
-        <input class="form-control" id = "name" required name="name" type="text">
-    </div>
+    <div class="container mt-3 mb-3">
+        <div class="card">
+            <div class="card-header text-center">Create Story</div>
+            <div class="card-body">
+                <form method="POST">
+                    <!-- Tell the user to insert the Name !-->
+                    <div class="form-group">
+                        <label for="name">Name</label>
+                        <input class="form-control" id="name" required name="name" type="text">
+                    </div>
 
-    <!-- Tell the user to insert the Description !-->
-    <div class="form-group">
-        <label for="description">Description</label>
-        <input class="form-control" id = "description" required name="description" type="text">
+                    <!-- Tell the user to insert the Description !-->
+                    <div class="form-group">
+                        <label for="description">Description</label>
+                        <input class="form-control" id="description" name="description" type="text">
+                    </div>
+                    <button type="submit" name="submitButton" class="btn btn-primary">Submit</button>
+                </form>
+            </div>
+        </div>
     </div>
-  <button type="submit" name="submitButton" class="btn btn-primary">Submit</button>
-</form>
-
-<?php
-include "footer.php";
-?>
+    <?php
+    include "footer.php";
+    ?>
 </body>
 
 </html>
