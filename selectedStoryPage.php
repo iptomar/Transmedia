@@ -71,7 +71,8 @@ $totaltimeText = array_sum(array_column($textFetch, 'duration'));
                     <label for="author" style="font-size:20px; font-weight: bold;">Author</label>
                     <p>
                         <?php
-                        print($storyFetch['author'])
+                        echo"<a href='user_profile.php?user=".$storyFetch['author']."'>".$storyFetch['author']."</a>";
+
                         ?>
                     </p>
                 </div>
