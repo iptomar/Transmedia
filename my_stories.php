@@ -19,7 +19,12 @@ $stories = $stmt->fetchAll(PDO::FETCH_DEFAULT);
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
     <title>My Stories</title>
     <link rel="stylesheet" href="./style/my_stories.css">
-
+    <style>
+        .img-thumbnail {
+            object-fit: contain;
+            max-height: 100%;
+        }
+    </style>
 </head>
 
 <body>
