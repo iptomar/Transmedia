@@ -71,7 +71,7 @@ $sql_image->execute([$_GET['id']]);
 $images = $sql_image->fetchAll(PDO::FETCH_ASSOC);
 
 // Fetch the story text
-$sql_image = $pdo->prepare('SELECT id, id_story, duration, storyorder, text, author FROM text WHERE id_story = ? ORDER BY storyorder;');
+$sql_image = $pdo->prepare('SELECT id, id_story, duration, storyorder, text FROM text WHERE id_story = ? ORDER BY storyorder;');
 $sql_image->execute([$_GET['id']]);
 $texts = $sql_image->fetchAll(PDO::FETCH_ASSOC);
 
@@ -97,11 +97,13 @@ foreach ($texts as $text) {
 //Use the larger duration as the total duration
 if ($audios_duration > $total_duration) {
     $total_duration = $audios_duration;
-} else if ($images_duration > $total_duration) {
+}
+if ($images_duration > $total_duration) {
     $total_duration = $images_duration;
-} else if ($texts_duration > $total_duration) {
+}
+if ($texts_duration > $total_duration) {
     $total_duration = $texts_duration;
-} 
+}
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -171,6 +173,16 @@ if ($audios_duration > $total_duration) {
         </div>
     </div>
 
+    <div class="modal fade" id="changeTextDuration" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-body">
+                    <?php include "edit_text_duration.php"; ?>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <div class="container mt-3 mb-3">
         <div class="card">
             <div class="card-header text-center">Edit Story</div>
@@ -205,7 +217,7 @@ if ($audios_duration > $total_duration) {
                 <p class="m-0 p-0" style="font-size: 14px;">Changes made to this form are permanent</p>
             </div>
 
-            <div class="preview-box w-0">
+            <div class="preview-box w-0" id="previewView">
                 <div class="w-100 mb-3 text-center">
                     <div class="p-0 mb-3 w-100 preview-title" style="font-size: 14px;">
                         <p class="m-0 p-0">Preview Media</p>
@@ -310,8 +322,8 @@ if ($audios_duration > $total_duration) {
                                         echo    '<div class="col p-0">
                                                     <button type="submit" name="orderdownImage" value="' . $image["id"] . '" class="w-100 btn-primary"><</button>
                                                 </div>';
-                                    echo        '<div class="col  p-0">
-                                                    <button type="submit" onclick="confirmDelete()" id="deleteText" name="deleteImage" value="' . $image["id"] . '" class="w-100  btn-danger">X</button>
+                                    echo        '<div class="col p-0">
+                                                    <button type="submit" onclick="confirmDelete()" id="deleteImage" name="deleteImage" value="' . $image["id"] . '" class="w-100  btn-danger">X</button>
                                                 </div>';
                                     if ($i < $numItems - 1)
                                         echo    '<div class="col  p-0">
@@ -320,7 +332,7 @@ if ($audios_duration > $total_duration) {
                                     echo    '</div>
                                         </div>';
                                     echo '<div class="img-div" ><img style="height:100px; width: auto; max-width:100%" src="./files/story_' . $image["storyId"] . '/image/' . $image["image"] . '"></img></div>';
-                                    echo '<button  type="button" class="btn-primary w-100" data-toggle="modal" data-target="#changeImgDuration" data-duration="'. $image["duration"].'"  data-image="'. $image["id"].'" class="w-100  btn-primary">🕑</button>';
+                                    echo '<button  type="button" class="btn-primary w-100" data-toggle="modal" data-target="#changeImgDuration" data-duration="' . $image["duration"] . '"  data-image="' . $image["id"] . '" class="w-100  btn-primary">🕑</button>';
                                     echo '<span class="duration"></span>';
                                     echo "</div>";
                                     $i++;
@@ -335,7 +347,7 @@ if ($audios_duration > $total_duration) {
                                 $numItems = count($texts);
                                 $i = 0;
                                 foreach ($texts as $text) {
-                                    echo "<div class='media-container image-container' data-duration='" . $text["duration"] . "'>";
+                                    echo "<div class='media-container text-container' data-duration='" . $text["duration"] . "'>";
                                     echo '<div class="media-buttons p-0">
                                             <div class="row p-0 m-0">';
                                     if ($i != 0)
@@ -351,7 +363,8 @@ if ($audios_duration > $total_duration) {
                                                 </div>';
                                     echo    '</div>
                                         </div>';
-                                    echo '<div class="w-100"><text style="height:100px; width: auto; max-width:100%" src="./files/story_' . $text["id_story"] . '/text/' . $text["text"] . '"></text></div>';
+                                    echo '<div class="w-100" style="height:50px; overflow-y: auto; background-color:white;"><p style="text-align: center; width: auto; max-width:100%; margin:0px; padding:5px 5px; " >' . $text["text"] . '</p></div>';
+                                    echo '<button  type="button" class="btn-primary w-100" data-toggle="modal" data-target="#changeTextDuration" data-duration="' . $text["duration"] . '"  data-text="' . $text["id"] . '" class="w-100  btn-primary">🕑</button>';
                                     echo '<span class="duration"></span>';
                                     echo "</div>";
                                     $i++;
@@ -375,13 +388,21 @@ if ($audios_duration > $total_duration) {
 
     <script>
         $('#changeImgDuration').on('show.bs.modal', function(event) {
-            console.log("MODAL OPENED")
-            var button = $(event.relatedTarget) 
-            var duration = button.data('duration') 
-            var id = button.data('image') 
+            var button = $(event.relatedTarget)
+            var duration = button.data('duration')
+            var id = button.data('image')
             var modal = $(this)
             modal.find('.modal-body #duration').val(duration)
             modal.find('.modal-body #imageID').val(id)
+        })
+
+        $('#changeTextDuration').on('show.bs.modal', function(event) {
+            var button = $(event.relatedTarget)
+            var duration = button.data('duration')
+            var id = button.data('text')
+            var modal = $(this)
+            modal.find('.modal-body #duration').val(duration)
+            modal.find('.modal-body #textID').val(id)
         })
         // Function prompts the user to confirm the delete before submitting the form
         function confirmDelete() {
@@ -505,6 +526,10 @@ if ($audios_duration > $total_duration) {
             preview.appendChild(clonedVideo);
             // Add CSS classes to make the preview element responsive
             preview.classList.add('embed-responsive', 'embed-responsive-16by9');
+            const previewView = document.getElementById('previewView');
+            previewView.scrollIntoView({
+                behavior: 'smooth'
+            });
         }
 
         // Preview an audio element
@@ -532,6 +557,10 @@ if ($audios_duration > $total_duration) {
             preview.appendChild(clonedAudio);
             // Add CSS classes to the preview element
             preview.className = 'w-100 mt-3';
+            const previewView = document.getElementById('previewView');
+            previewView.scrollIntoView({
+                behavior: 'smooth'
+            });
         }
 
         // Preview an image element
@@ -546,20 +575,29 @@ if ($audios_duration > $total_duration) {
             preview.innerHTML = '<img src="' + clonedImage + '"></img>';
             // Add CSS classes to the preview element
             preview.className = 'w-100 mt-3';
+            const previewView = document.getElementById('previewView');
+            previewView.scrollIntoView({
+                behavior: 'smooth'
+            });
         }
 
         // Preview a text element
-        function previewText(text){
-            // Clone the text element
-            const cloneText = text.getAttribute("src");
+        function previewText(text) {
+
             // Get the preview element
             const preview = document.querySelector('#preview');
             // Clear any existing content in the preview element
             preview.innerHTML = '';
-             // Add the cloned audio element to the preview element
-             preview.innerHTML = '<img src="' + cloneText + '"></img>';
+            // Add the cloned audio element to the preview element
+            preview.innerHTML = '<p>' + text.innerHTML + '</p>';
             // Add CSS classes to the preview element
             preview.className = 'w-100 mt-3';
+
+            const previewView = document.getElementById('previewView');
+            previewView.scrollIntoView({
+                behavior: 'smooth'
+            });
+
         }
 
         // The Youtube Frame API will call this function when the video player is ready.
@@ -702,10 +740,43 @@ if ($audios_duration > $total_duration) {
 
                 });
             });
+            setTextContainer()
         }
 
         // This function sets up the text containers in the story
-        function setTextContainer(){}
+        function setTextContainer() {
+            time = 0;
+            // Get all the audio containers in the story
+            const containers = document.querySelectorAll('.medias-wrapper .text-container');
+            // Loop through each container
+            containers.forEach(container => {
+                // Get the duration of the video 
+                var duration = parseInt(container.dataset.duration);
+
+                adjustContainer(container, duration);
+
+                // Add the duration of the current video to the video time passed and format the time element
+                time += duration;
+                const durationElement = container.querySelector('.duration');
+                //Format the time of the video
+                durationElement.textContent = timeFormat(time);
+
+                // Add click event listener to the container
+                container.addEventListener('click', (e) => {
+                    // Don't trigger if button is pressed
+                    if ($(e.target).is("button")) {
+                        return;
+                    } else {
+                        const text = container.querySelector('p');
+                        // Preview the audio when container is clicked
+                        previewText(text);
+                    }
+
+                });
+            });
+
+
+        }
 
         // This function adjusts the size of the media wrapper and duration lines 
         //The perct parameter represents the additional percentage to be added to the width of the wrappers and lines.

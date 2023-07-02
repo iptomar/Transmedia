@@ -35,7 +35,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['add_text'])) {
             SELECT ?,?,?,?,coalesce(MAX(storyorder),0)+ 1 FROM text WHERE id_story = ?;";
         $stmt = $pdo->prepare($sql);
         $stmt->execute([$storyID, $text, $duration, $author, $storyID]);
-        //reload_page();
+        reload_page();
     } catch (Exception $e) {
         echo '<script>alert("ERROR occured while connecting to the database")</script>';
     }

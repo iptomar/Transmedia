@@ -62,3 +62,4 @@ if (isset($_POST['orderdownText'])) {
         $pdo->rollBack();
         message_redirect("Something went wrong when deleting the image", "edit_story.php?id=$id");
     }
+}
