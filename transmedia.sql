@@ -200,6 +200,17 @@ ALTER TABLE
 ADD
   CONSTRAINT `text_ibfk_1` FOREIGN KEY (`id_story`) REFERENCES `story` (`id`);
 
+
+ALTER TABLE
+  `text` DROP FOREIGN KEY `text_ibfk_1`;
+
+ALTER TABLE
+  `text`
+ADD
+  CONSTRAINT `text_ibfk_1` FOREIGN KEY (`id_story`) REFERENCES `story` (`id`) ON DELETE CASCADE;
+
+
+
 ALTER TABLE
   `text`
 MODIFY
