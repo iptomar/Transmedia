@@ -122,6 +122,7 @@ $totaltimeText = array_sum(array_column($textFetch, 'duration'));
                     if (count($videoFetch) + count($audioFetch) + count($imagesFetch)  + count($textFetch) == 0) {
                         echo "<p>Sem conteúdo para apresentar</p>";
                     } else {
+                        echo '<div class="spinner-border mt-2" role="status" id="loadingSpinner"><span class="sr-only">Loading...</span></div>';
                         switch ($mediaOpt) {
 
                             case "video":
@@ -201,6 +202,7 @@ $totaltimeText = array_sum(array_column($textFetch, 'duration'));
 
     //function to be called on <body> load
     function inic() {
+        var loadingSpinner = document.getElementById('loadingSpinner');
 
         allPlayers = document.getElementsByClassName("player");
         if (sessionStorage.getItem("storyId") != <?= $storyFetch['id'] ?>) {
@@ -239,6 +241,8 @@ $totaltimeText = array_sum(array_column($textFetch, 'duration'));
             // Use Promise.all to wait for all promises to resolve
             Promise.all(playerPromises)
                 .then(() => {
+                    loadingSpinner.style.display = 'none';
+
                     // All players have loaded, so play the media now
                     playWithElapsedTime();
                 })
@@ -247,6 +251,7 @@ $totaltimeText = array_sum(array_column($textFetch, 'duration'));
                     console.error("Error loading YouTube players:", error);
                 });
         } else {
+            loadingSpinner.style.display = 'none';
             // If there are no iframes, run the function immediately
             playWithElapsedTime();
         }
@@ -276,6 +281,11 @@ $totaltimeText = array_sum(array_column($textFetch, 'duration'));
                 'onStateChange': onPlayerStateChange
             }
         });
+    }
+
+    //The API will call this function when the video player is ready.
+    function onPlayerReady() {
+        console.log("Player Ready")
     }
 
     // Create a function that returns a promise for each player
@@ -365,7 +375,7 @@ $totaltimeText = array_sum(array_column($textFetch, 'duration'));
 
         //set the session variable with the elapsed story time
         sessionStorage.setItem("totalStoryElapsedTime", getTotalElapsedStoryTime());
-
+        sessionStorage.setItem("scrollHeigth", document.documentElement.scrollTop);
         //empty the queue on switching
         queue.length = 0;
     }
@@ -373,6 +383,7 @@ $totaltimeText = array_sum(array_column($textFetch, 'duration'));
     //function to play the current player
     //acording to the elapsed story time
     async function playWithElapsedTime() {
+
 
         //store total elapsed time in variable
         //(this variable is to later store The
@@ -429,6 +440,14 @@ $totaltimeText = array_sum(array_column($textFetch, 'duration'));
             actualPlayer.g.style.height = "100%";
             actualPlayer.g.parentElement.style.setProperty("display", "block", "important")
         }
+
+        const scrollHeight = sessionStorage.getItem("scrollHeigth") || 0;
+
+        console.log(scrollHeight)
+        window.scrollTo({
+            top: scrollHeight,
+            behavior: 'smooth'
+        });
     }
 
     function getNextPlayerIndex(Player) {
@@ -590,10 +609,6 @@ $totaltimeText = array_sum(array_column($textFetch, 'duration'));
     }
 
 
-    //The API will call this function when the video player is ready.
-    function onPlayerReady() {
-        console.log("Player ready");
-    }
 
     //The API calls this function when the player's state changes.
     function onPlayerStateChange(event) {
