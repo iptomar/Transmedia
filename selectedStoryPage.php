@@ -215,28 +215,82 @@ $totaltimeText = array_sum(array_column($textFetch, 'duration'));
         prevBtn = document.getElementById("prevMediaButton");
         nextBtn = document.getElementById("nextMediaButton");
 
-        //wait time in milliseconds
-        var waitTimeMillis = allPlayers.length * 500;
 
         //variable to count the players with tag = "IFRAME"
         let count = -1;
+        let hasIframe = false;
+
+        // Create an array of promises for each player
+        const playerPromises = [];
+
         //iterate through all video players
         for (i = 0; i < allPlayers.length; i++) {
             // if one happens to have tag = "IFRAME"
             if (allPlayers[i].tagName == "IFRAME") {
                 //increment count by 1
                 count++;
-                //call the method to prepare the YouTube API for this element
-                onYouTubeIframeAPIReady("player" + i, count);
-
+                // Push the promise for this player into the array
+                playerPromises.push(prepareYouTubePlayer("player" + i, count));
+                hasIframe = true;
             }
         }
+        // Check if there are any iframes
+        if (hasIframe) {
+            // Use Promise.all to wait for all promises to resolve
+            Promise.all(playerPromises)
+                .then(() => {
+                    // All players have loaded, so play the media now
+                    playWithElapsedTime();
+                })
+                .catch((error) => {
+                    // Handle any errors that may occur during loading
+                    console.error("Error loading YouTube players:", error);
+                });
+        } else {
+            // If there are no iframes, run the function immediately
+            playWithElapsedTime();
+        }
 
-        playWithElapsedTime(waitTimeMillis);
     }
 
-    const sleep = (ms) =>
-        new Promise(resolve => setTimeout(resolve, ms));
+    //This code loads the IFrame Player API code asynchronously.
+    var tag = document.createElement('script');
+
+    tag.src = "https://www.youtube.com/iframe_api";
+    var firstScriptTag = document.getElementsByTagName('script')[0];
+    firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+
+    //array to store all YouTube players
+    var player = [];
+
+    //This function creates an <iframe> (and YouTube player)
+    //after the API code downloads.
+    function onYouTubeIframeAPIReady(id, i) {
+        player[i] = new YT.Player("" + id, {
+            playerVars: {
+                'autoplay': 0,
+                'controls': 1
+            },
+            events: {
+                'onReady': onPlayerReady,
+                'onStateChange': onPlayerStateChange
+            }
+        });
+    }
+
+    // Create a function that returns a promise for each player
+    function prepareYouTubePlayer(playerId, count) {
+        return new Promise((resolve, reject) => {
+            // Call the onYouTubeIframeAPIReady function with the player ID and count
+            onYouTubeIframeAPIReady(playerId, count);
+
+            // Set a listener for the "ready" event of the player
+            const player = window.player[count];
+            player.addEventListener("onReady", () => {
+                resolve();
+            });
+        });
+    }
 
     //function that retrieves the actual elapsed story time
     function getTotalElapsedStoryTime() {
@@ -318,10 +372,8 @@ $totaltimeText = array_sum(array_column($textFetch, 'duration'));
 
     //function to play the current player
     //acording to the elapsed story time
-    async function playWithElapsedTime(waitTimeMillis) {
-        if ("<?= $mediaOpt ?>" == "video") {
-            await sleep(waitTimeMillis);
-        }
+    async function playWithElapsedTime() {
+
         //store total elapsed time in variable
         //(this variable is to later store The
         //current time of the current player)
@@ -461,11 +513,11 @@ $totaltimeText = array_sum(array_column($textFetch, 'duration'));
             allPlayers[adjacentPlayerIndex].parentElement.style.setProperty("display", "block", "important")
             allPlayers[adjacentPlayerIndex].play();
         } else if (allPlayers[adjacentPlayerIndex].tagName == "AUDIO") {
-            allPlayers[adjacentPlayerIndex].style.display = "block";
+            allPlayers[adjacentPlayerIndex].style.display = "inline";
             allPlayers[adjacentPlayerIndex].parentElement.style.setProperty("display", "block", "important")
             allPlayers[adjacentPlayerIndex].play();
         } else if (allPlayers[adjacentPlayerIndex].tagName == "IMG" || allPlayers[adjacentPlayerIndex].tagName == "P") {
-            allPlayers[adjacentPlayerIndex].style.display = "block";
+            allPlayers[adjacentPlayerIndex].style.display = "inline";
             allPlayers[adjacentPlayerIndex].parentElement.style.setProperty("display", "block", "important")
             queueManager(allPlayers[adjacentPlayerIndex]);
         } else {
@@ -537,30 +589,6 @@ $totaltimeText = array_sum(array_column($textFetch, 'duration'));
         getTotalElapsedStoryTime();
     }
 
-    //This code loads the IFrame Player API code asynchronously.
-    var tag = document.createElement('script');
-
-    tag.src = "https://www.youtube.com/iframe_api";
-    var firstScriptTag = document.getElementsByTagName('script')[0];
-    firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
-
-    //array to store all YouTube players
-    var player = [];
-
-    //This function creates an <iframe> (and YouTube player)
-    //after the API code downloads.
-    function onYouTubeIframeAPIReady(id, i) {
-        player[i] = new YT.Player("" + id, {
-            playerVars: {
-                'autoplay': 0,
-                'controls': 1
-            },
-            events: {
-                'onReady': onPlayerReady,
-                'onStateChange': onPlayerStateChange
-            }
-        });
-    }
 
     //The API will call this function when the video player is ready.
     function onPlayerReady() {
