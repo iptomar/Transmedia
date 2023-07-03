@@ -76,7 +76,7 @@ $totaltimeText = array_sum(array_column($textFetch, 'duration'));
                     </p>
                 </div>
 
-                <div class="change-media">
+                <div class="change-media" id="changeMediaBtn">
 
                     <form method="post" onsubmit="onSwitch()">
                         <?php
@@ -95,7 +95,6 @@ $totaltimeText = array_sum(array_column($textFetch, 'duration'));
                         }
 
                         ?>
-
 
                     </form>
 
@@ -123,39 +122,41 @@ $totaltimeText = array_sum(array_column($textFetch, 'duration'));
                     if (count($videoFetch) + count($audioFetch) + count($imagesFetch)  + count($textFetch) == 0) {
                         echo "<p>Sem conteúdo para apresentar</p>";
                     } else {
+                        echo '<div class="spinner-border mt-2" role="status" id="loadingSpinner"><span class="sr-only">Loading...</span></div>';
                         switch ($mediaOpt) {
 
                             case "video":
                                 for ($i = 0; $i < count($videoFetch); $i++) {
-                                    echo '<div style="width:0px; height:0px; display: none;" id="preview' . $i . '" class="video-preview embed-responsive embed-responsive-16by9 d-inline-block rounded">';
+                                    echo '<div style="display: none !important; max-height: 550px; height:100%;  width:auto;" id="preview' . $i . '" class="video-preview embed-responsive embed-responsive-16by9 d-inline-block rounded">';
                                     if ($videoFetch[$i]["videoType"] == "file") {
-                                        echo '<video style="display: none;" id="player' . $i . '" onplay="queueManager(this)" onended="playAdjacentPlayer(\'right\')" class ="video-audio player video-class embed-responsive-item" controls src="./files/story_' . $videoFetch[$i]["storyId"] . '/video/' . $videoFetch[$i]["link"] . '"></video>';
+                                        echo '<video style="max-height: 550px; width:auto;  height:100%; " id="player' . $i . '" onplay="queueManager(this)" onended="playAdjacentPlayer(\'right\')" class ="video-audio player video-class embed-responsive-item" controls src="./files/story_' . $videoFetch[$i]["storyId"] . '/video/' . $videoFetch[$i]["link"] . '"></video>';
                                     } elseif ($videoFetch[$i]["videoType"] == "text") {
-                                        echo '<iframe style="display: none;" id="player' . $i . '" class ="player video-class embed-responsive-item" type="text/html" src="https://www.youtube.com/embed/' . $videoFetch[$i]["link"] . '?enablejsapi=1" allowfullscreen="true" allow="autoplay" allowscriptaccess="always"></iframe>'; //add iframe with src pointing to the video with this code
+                                        echo '<iframe style="max-height: 550px; width:auto;" id="player' . $i . '" class ="player video-class embed-responsive-item" type="text/html" src="https://www.youtube.com/embed/' . $videoFetch[$i]["link"] . '?enablejsapi=1" allowfullscreen="true" allow="autoplay" allowscriptaccess="always"></iframe>'; //add iframe with src pointing to the video with this code
                                     }
                                     echo '</div>';
                                 }
                                 break;
 
+
                             case "audio":
 
                                 for ($i = 0; $i < count($audioFetch); $i++) {
-                                    echo '<div style="width:0px; height:0px; display: none;" id="preview' . $i . '" class="audio-preview">';
-                                    echo '<audio style="display: none;" class=" video-audio player audio-class" onplay="queueManager(this)" onended="playAdjacentPlayer(\'right\')" controls id="audio-player-' . $i . '" src="./files/story_' . $audioFetch[$i]["id_story"] . '/audio/' . $audioFetch[$i]["audio"] . '"></audio>';
+                                    echo '<div style="display: none;" id="preview' . $i . '" class="audio-preview">';
+                                    echo '<audio style="width: 100%" class=" video-audio player audio-class" onplay="queueManager(this)" onended="playAdjacentPlayer(\'right\')" controls id="audio-player-' . $i . '" src="./files/story_' . $audioFetch[$i]["id_story"] . '/audio/' . $audioFetch[$i]["audio"] . '"></audio>';
                                     echo '</div>';
                                 }
                                 break;
                             case "images":
                                 foreach ($imagesFetch as $image) {
-                                    echo '<div style="width:0px; height:0px; display: none;">';
-                                    echo '<img style="display: none;" class="mb-3 image-class player" data-duration="' . $image['duration'] . '" id="img-' . $image['id'] . '" src="./files/story_' . $image["storyID"] . '/image/' . $image["image"] . '"></img>';
+                                    echo '<div style="display: none !important; max-height: 550px; width:auto;">';
+                                    echo '<img style="max-height: 550px; width:auto;" class="mb-3 image-class player" data-duration="' . $image['duration'] . '" id="img-' . $image['id'] . '" src="./files/story_' . $image["storyID"] . '/image/' . $image["image"] . '"></img>';
                                     echo '</div>';
                                 }
                                 break;
                             case "text":
                                 foreach ($textFetch as $text) {
-                                    echo '<div style="width:0px; height:0px; display: none;">';
-                                    echo '<p style="display: none;" class="mb-3 text-class player" data-duration="' . $text['duration'] . '" id="text-' . $text['id'] . '">' . $text["text"] . '</p>';
+                                    echo '<div style="display: none !important; max-height: 550px;  width:auto;">';
+                                    echo '<p class="mb-3 text-class player" data-duration="' . $text['duration'] . '" id="text-' . $text['id'] . '">' . $text["text"] . '</p>';
                                     echo '</div>';
                                 }
                                 break;
@@ -163,7 +164,7 @@ $totaltimeText = array_sum(array_column($textFetch, 'duration'));
 
                         echo <<<EOF
     
-                        <div id="adjVidButDiv">
+                        <div id="adjVidButDiv" class="mt-3">
                             <button id="prevMediaButton" style="visibility: hidden; color: white; background-color: #007bff; border: 0px; height:30px; width: 25%; border-radius: 4px; cursor: pointer;" class="adj-button" onclick="playAdjacentPlayer('left')"><b>|<<</b></button>
                             <button id="nextMediaButton" style="visibility: hidden;color: white; background-color: #007bff; border: 0px; height:30px; width: 25%; border-radius: 4px; cursor: pointer;" class="adj-button" onclick="playAdjacentPlayer('right')"><b>>>|</b></button>
                         </div>
@@ -201,6 +202,7 @@ $totaltimeText = array_sum(array_column($textFetch, 'duration'));
 
     //function to be called on <body> load
     function inic() {
+        var loadingSpinner = document.getElementById('loadingSpinner');
 
         allPlayers = document.getElementsByClassName("player");
         if (sessionStorage.getItem("storyId") != <?= $storyFetch['id'] ?>) {
@@ -215,28 +217,90 @@ $totaltimeText = array_sum(array_column($textFetch, 'duration'));
         prevBtn = document.getElementById("prevMediaButton");
         nextBtn = document.getElementById("nextMediaButton");
 
-        //wait time in milliseconds
-        var waitTimeMillis = allPlayers.length * 500;
 
         //variable to count the players with tag = "IFRAME"
         let count = -1;
+        let hasIframe = false;
+
+        // Create an array of promises for each player
+        const playerPromises = [];
+
         //iterate through all video players
         for (i = 0; i < allPlayers.length; i++) {
             // if one happens to have tag = "IFRAME"
             if (allPlayers[i].tagName == "IFRAME") {
                 //increment count by 1
                 count++;
-                //call the method to prepare the YouTube API for this element
-                onYouTubeIframeAPIReady("player" + i, count);
-
+                // Push the promise for this player into the array
+                playerPromises.push(prepareYouTubePlayer("player" + i, count));
+                hasIframe = true;
             }
         }
+        // Check if there are any iframes
+        if (hasIframe) {
+            // Use Promise.all to wait for all promises to resolve
+            Promise.all(playerPromises)
+                .then(() => {
+                    loadingSpinner.style.display = 'none';
 
-        playWithElapsedTime(waitTimeMillis);
+                    // All players have loaded, so play the media now
+                    playWithElapsedTime();
+                })
+                .catch((error) => {
+                    // Handle any errors that may occur during loading
+                    console.error("Error loading YouTube players:", error);
+                });
+        } else {
+            loadingSpinner.style.display = 'none';
+            // If there are no iframes, run the function immediately
+            playWithElapsedTime();
+        }
+
     }
 
-    const sleep = (ms) =>
-        new Promise(resolve => setTimeout(resolve, ms));
+    //This code loads the IFrame Player API code asynchronously.
+    var tag = document.createElement('script');
+
+    tag.src = "https://www.youtube.com/iframe_api";
+    var firstScriptTag = document.getElementsByTagName('script')[0];
+    firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+
+    //array to store all YouTube players
+    var player = [];
+
+    //This function creates an <iframe> (and YouTube player)
+    //after the API code downloads.
+    function onYouTubeIframeAPIReady(id, i) {
+        player[i] = new YT.Player("" + id, {
+            playerVars: {
+                'autoplay': 0,
+                'controls': 1
+            },
+            events: {
+                'onReady': onPlayerReady,
+                'onStateChange': onPlayerStateChange
+            }
+        });
+    }
+
+    //The API will call this function when the video player is ready.
+    function onPlayerReady() {
+        console.log("Player Ready")
+    }
+
+    // Create a function that returns a promise for each player
+    function prepareYouTubePlayer(playerId, count) {
+        return new Promise((resolve, reject) => {
+            // Call the onYouTubeIframeAPIReady function with the player ID and count
+            onYouTubeIframeAPIReady(playerId, count);
+
+            // Set a listener for the "ready" event of the player
+            const player = window.player[count];
+            player.addEventListener("onReady", () => {
+                resolve();
+            });
+        });
+    }
 
     //function that retrieves the actual elapsed story time
     function getTotalElapsedStoryTime() {
@@ -311,16 +375,15 @@ $totaltimeText = array_sum(array_column($textFetch, 'duration'));
 
         //set the session variable with the elapsed story time
         sessionStorage.setItem("totalStoryElapsedTime", getTotalElapsedStoryTime());
-
+        sessionStorage.setItem("scrollHeigth", document.documentElement.scrollTop);
         //empty the queue on switching
         queue.length = 0;
     }
 
-
     //function to play the current player
     //acording to the elapsed story time
-    async function playWithElapsedTime(waitTimeMillis) {
-        await sleep(waitTimeMillis);
+    async function playWithElapsedTime() {
+
 
         //store total elapsed time in variable
         //(this variable is to later store The
@@ -335,7 +398,6 @@ $totaltimeText = array_sum(array_column($textFetch, 'duration'));
 
         //varible to store iframe
         var iframe;
-
 
         for (i = 0; i < allPlayers.length; i++) {
             if (allPlayers[i].tagName == "VIDEO" || allPlayers[i].tagName == "AUDIO" || allPlayers[i].tagName == "IMG" || allPlayers[i].tagName == "P") {
@@ -364,83 +426,51 @@ $totaltimeText = array_sum(array_column($textFetch, 'duration'));
         buttonsCalculate(getPlayerIndex(actualPlayer))
         queueManager(actualPlayer);
 
-        if (actualPlayer.tagName == "VIDEO") {
+        if (actualPlayer.tagName == "VIDEO" || actualPlayer.tagName == "AUDIO") {
             actualPlayer.currentTime = actualPlayerTime;
-            actualPlayer.style.display = "inline";
-            actualPlayer.style.width = "100%";
-            actualPlayer.style.height = "100%";
-            actualPlayer.parentElement.style.display = "inline";
-            actualPlayer.parentElement.style.width = "100%";
-            actualPlayer.parentElement.style.height = "100%";
-            actualPlayer.play();
-        } else if (actualPlayer.tagName == "AUDIO") {
-            actualPlayer.currentTime = actualPlayerTime;
-            actualPlayer.style.display = "inline";
-            actualPlayer.style.width = "100%";
-            actualPlayer.style.height = "100px";
-            actualPlayer.parentElement.style.display = "inline";
-            actualPlayer.parentElement.style.width = "100%";
-            actualPlayer.parentElement.style.height = "100px";
+            actualPlayer.parentElement.style.setProperty("display", "block", "important")
             actualPlayer.play();
         } else if (actualPlayer.tagName == "IMG" || actualPlayer.tagName == "P") {
             actualPlayer.currentTime = actualPlayerTime;
-            actualPlayer.style.display = "inline";
-            actualPlayer.style.width = "100%";
-            actualPlayer.style.height = "100%";
-            actualPlayer.parentElement.style.display = "inline";
-            actualPlayer.parentElement.style.width = "100%";
-            actualPlayer.parentElement.style.height = "100%";
+            actualPlayer.parentElement.style.setProperty("display", "block", "important")
             queueManager(actualPlayer)
         } else {
             actualPlayer.loadVideoByUrl(iframe.getAttribute("src"), actualPlayerTime, 'large');
-            actualPlayer.g.style.display = "inline";
             actualPlayer.g.style.width = "100%";
             actualPlayer.g.style.height = "100%";
-            actualPlayer.g.parentElement.style.display = "inline";
-            actualPlayer.g.parentElement.style.width = "100%";
-            actualPlayer.g.parentElement.style.height = "100%";
+            actualPlayer.g.parentElement.style.setProperty("display", "block", "important")
         }
+
+        const scrollHeight = sessionStorage.getItem("scrollHeigth") || 0;
+
+        console.log(scrollHeight)
+        window.scrollTo({
+            top: scrollHeight,
+            behavior: 'smooth'
+        });
     }
 
     function getNextPlayerIndex(Player) {
 
         var adjacentPlayerIndex = 0;
 
-
         adjacentPlayerIndex = getPlayerIndex(Player) + 1;
-
 
         if (Player.tagName == "VIDEO" || Player.tagName == "AUDIO") {
             //get the story order of the actual video or audio
             Player.pause();
             Player.currentTime = 0;
-            Player.style.display = "none";
-            Player.style.width = 0;
-            Player.style.height = 0;
-            Player.parentElement.style.display = "none";
-            Player.parentElement.style.width = 0;
-            Player.parentElement.style.height = 0;
+            Player.parentElement.style.setProperty("display", "none", "important")
 
         } else if (Player.tagName == "IMG" || Player.tagName == "P") {
             Player.currentTime = 0;
-            Player.style.display = "none";
-            Player.style.width = 0;
-            Player.style.height = 0;
-            Player.parentElement.style.display = "none";
-            Player.parentElement.style.width = 0;
-            Player.parentElement.style.height = 0;
+            Player.parentElement.style.setProperty("display", "none", "important")
 
         } else {
             //get the story order of the actual YouTube video
             adjacentPlayerIndex = Array.prototype.slice.call(allPlayers).indexOf(Player.g) + 1;
-
             Player.pauseVideo();
-            Player.g.style.display = "none";
-            Player.g.style.width = 0;
-            Player.g.style.height = 0;
-            Player.g.parentElement.style.display = "none";
-            Player.g.parentElement.style.width = 0;
-            Player.g.parentElement.style.height = 0;
+            Player.g.parentElement.style.setProperty("display", "none", "important")
         }
 
         //verify if there are more players
@@ -460,30 +490,13 @@ $totaltimeText = array_sum(array_column($textFetch, 'duration'));
         if (Player.tagName == "VIDEO" || Player.tagName == "AUDIO") {
             Player.pause();
             Player.currentTime = 0;
-            Player.style.display = "none";
-            Player.style.width = 0;
-            Player.style.height = 0;
-            Player.parentElement.style.display = "none";
-            Player.parentElement.style.width = 0;
-            Player.parentElement.style.height = 0;
-
+            Player.parentElement.style.setProperty("display", "none", "important")
         } else if (Player.tagName == "IMG" || Player.tagName == "P") {
             Player.currentTime = 0;
-            Player.style.display = "none";
-            Player.style.width = 0;
-            Player.style.height = 0;
-            Player.parentElement.style.display = "none";
-            Player.parentElement.style.width = 0;
-            Player.parentElement.style.height = 0;
-
+            Player.parentElement.style.setProperty("display", "none", "important")
         } else {
             Player.stopVideo();
-            Player.g.style.display = "none";
-            Player.g.style.width = 0;
-            Player.g.style.height = 0;
-            Player.g.parentElement.style.display = "none";
-            Player.g.parentElement.style.width = 0;
-            Player.g.parentElement.style.height = 0;
+            Player.g.parentElement.style.setProperty("display", "none", "important")
         }
 
         //verify if there are more players
@@ -516,39 +529,24 @@ $totaltimeText = array_sum(array_column($textFetch, 'duration'));
 
         //queue.push(allPlayers[adjacentPlayerIndex]);
         if (allPlayers[adjacentPlayerIndex].tagName == "VIDEO") {
-            allPlayers[adjacentPlayerIndex].style.display = "inline";
-            allPlayers[adjacentPlayerIndex].style.width = "100%";
-            allPlayers[adjacentPlayerIndex].style.height = "100%";
-            allPlayers[adjacentPlayerIndex].parentElement.style.display = "inline";
-            allPlayers[adjacentPlayerIndex].parentElement.style.width = "100%";
-            allPlayers[adjacentPlayerIndex].parentElement.style.height = "100%";
+            allPlayers[adjacentPlayerIndex].parentElement.style.setProperty("display", "block", "important")
             allPlayers[adjacentPlayerIndex].play();
         } else if (allPlayers[adjacentPlayerIndex].tagName == "AUDIO") {
             allPlayers[adjacentPlayerIndex].style.display = "inline";
-            allPlayers[adjacentPlayerIndex].style.width = "100%";
-            allPlayers[adjacentPlayerIndex].style.height = "100px";
-            allPlayers[adjacentPlayerIndex].parentElement.style.display = "inline";
-            allPlayers[adjacentPlayerIndex].parentElement.style.width = "100%";
-            allPlayers[adjacentPlayerIndex].parentElement.style.height = "100px";
+            allPlayers[adjacentPlayerIndex].parentElement.style.setProperty("display", "block", "important")
             allPlayers[adjacentPlayerIndex].play();
         } else if (allPlayers[adjacentPlayerIndex].tagName == "IMG" || allPlayers[adjacentPlayerIndex].tagName == "P") {
             allPlayers[adjacentPlayerIndex].style.display = "inline";
-            allPlayers[adjacentPlayerIndex].style.width = "100%";
-            allPlayers[adjacentPlayerIndex].style.height = "100%";
-            allPlayers[adjacentPlayerIndex].parentElement.style.display = "inline";
-            allPlayers[adjacentPlayerIndex].parentElement.style.width = "100%";
-            allPlayers[adjacentPlayerIndex].parentElement.style.height = "100%";
+            allPlayers[adjacentPlayerIndex].parentElement.style.setProperty("display", "block", "important")
             queueManager(allPlayers[adjacentPlayerIndex]);
         } else {
             //get YouTube player to play it
             for (j = 0; j < player.length; j++) {
                 if (player[j].g == allPlayers[adjacentPlayerIndex]) {
-                    allPlayers[adjacentPlayerIndex].style.display = "inline";
+                    allPlayers[adjacentPlayerIndex].style.setProperty("display", "block", "important")
                     allPlayers[adjacentPlayerIndex].style.width = "100%";
                     allPlayers[adjacentPlayerIndex].style.height = "100%";
-                    allPlayers[adjacentPlayerIndex].parentElement.style.display = "inline";
-                    allPlayers[adjacentPlayerIndex].parentElement.style.width = "100%";
-                    allPlayers[adjacentPlayerIndex].parentElement.style.height = "100%";
+                    allPlayers[adjacentPlayerIndex].parentElement.style.setProperty("display", "block", "important")
                     player[j].playVideo();
                     break;
                 }
@@ -597,62 +595,20 @@ $totaltimeText = array_sum(array_column($textFetch, 'duration'));
                 //console.log(lastPlay)
                 lastPlay.pause();
                 lastPlay.currentTime = 0;
-                lastPlay.style.display = "none";
-                lastPlay.parentElement.style.width = 0;
-                lastPlay.parentElement.style.height = 0;
-                lastPlay.parentElement.style.display = "none";
-                lastPlay.parentElement.style.width = 0;
-                lastPlay.parentElement.style.height = 0;
+                lastPlay.parentElement.style.setProperty("display", "none", "important")
             } else if (lastPlay.tagName == "IMG" || lastPlay.tagName == "P") {
-                lastPlay.style.display = "none";
-                lastPlay.parentElement.style.width = 0;
-                lastPlay.parentElement.style.height = 0;
-                lastPlay.parentElement.style.display = "none";
-                lastPlay.parentElement.style.width = 0;
-                lastPlay.parentElement.style.height = 0;
+                lastPlay.style.setProperty("display", "none", "important")
+                lastPlay.parentElement.style.setProperty("display", "none", "important")
             } else {
                 //console.log(lastPlay)
                 lastPlay.pauseVideo();
-                lastPlay.g.style.display = "none";
-                lastPlay.g.parentElement.style.width = 0;
-                lastPlay.g.parentElement.style.height = 0;
-                lastPlay.g.parentElement.style.display = "none";
-                lastPlay.g.parentElement.style.width = 0;
-                lastPlay.g.parentElement.style.height = 0;
+                lastPlay.g.parentElement.style.setProperty("display", "none", "important")
             }
         }
         getTotalElapsedStoryTime();
     }
 
-    //This code loads the IFrame Player API code asynchronously.
-    var tag = document.createElement('script');
 
-    tag.src = "https://www.youtube.com/iframe_api";
-    var firstScriptTag = document.getElementsByTagName('script')[0];
-    firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
-
-    //array to store all YouTube players
-    var player = [];
-
-    //This function creates an <iframe> (and YouTube player)
-    //after the API code downloads.
-    function onYouTubeIframeAPIReady(id, i) {
-        player[i] = new YT.Player("" + id, {
-            playerVars: {
-                'autoplay': 0,
-                'controls': 1
-            },
-            events: {
-                'onReady': onPlayerReady,
-                'onStateChange': onPlayerStateChange
-            }
-        });
-    }
-
-    //The API will call this function when the video player is ready.
-    function onPlayerReady() {
-        console.log("Player ready");
-    }
 
     //The API calls this function when the player's state changes.
     function onPlayerStateChange(event) {
